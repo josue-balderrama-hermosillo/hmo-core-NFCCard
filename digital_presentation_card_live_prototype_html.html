@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Josue Balderrama — Digital Card</title>
+  <meta name="description" content="BIM/VDC Innovation — Hermosillo. Connect, view demos, and save contact." />
+  <!-- Open Graph for nice link previews -->
+  <meta property="og:title" content="Josue Balderrama — Digital Card" />
+  <meta property="og:description" content="BIM/VDC Innovation — Hermosillo. Connect, view demos, and save contact." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://placehold.co/1200x630/png?text=Josue+Balderrama+%7C+Hermosillo" />
+  <meta name="theme-color" content="#FF6A00" />
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            hmo: {
+              orange: '#FF6A00',
+              navy: '#2f3b52',
+              gray: '#F5F7FA'
+            }
+          },
+          borderRadius: {
+            '2xl': '1.25rem'
+          },
+          boxShadow: {
+            soft: '0 10px 30px rgba(0,0,0,0.08)'
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Lightweight QR generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    .pill { @apply inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 text-slate-700; }
+  </style>
+</head>
+<body class="bg-white text-slate-800">
+  <!-- NAV / HEADER -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- Hermosillo logo placeholder -->
+        <div class="w-7 h-7 rounded-lg bg-hmo-orange grid place-items-center text-white font-black">H</div>
+        <span class="font-extrabold tracking-tight">HERMOSILLO</span>
+        <span class="text-hmo-orange font-semibold">• Experience Matters</span>
+      </div>
+      <nav class="hidden sm:flex items-center gap-4 text-sm">
+        <a href="#showcase" class="hover:text-hmo-orange">Demos</a>
+        <a href="#ar" class="hover:text-hmo-orange">AR</a>
+        <a href="#contact" class="hover:text-hmo-orange">Contact</a>
+      </nav>
+      <!-- AU badge placeholder -->
+      <div class="hidden sm:flex items-center gap-2">
+        <span class="text-xs text-slate-500">AU 2025 Speaker</span>
+        <div class="w-7 h-7 rounded-full bg-hmo-navy grid place-items-center text-white text-[10px] font-bold">AU</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO / DIGITAL CARD -->
+  <section class="relative">
+    <div class="max-w-6xl mx-auto px-4 py-12 grid lg:grid-cols-2 gap-10 items-center">
+      <!-- Left: Card visual -->
+      <div>
+        <div class="bg-hmo-navy text-white rounded-2xl p-6 shadow-soft relative overflow-hidden">
+          <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5"></div>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-hmo-orange grid place-items-center text-white font-black text-lg">H</div>
+            <div>
+              <p class="text-sm text-slate-300">Hermosillo — Design & Construction</p>
+              <p class="text-xs text-hmo-orange font-semibold">Experience Matters®</p>
+            </div>
+          </div>
+          <div class="mt-6">
+            <h1 class="text-3xl font-extrabold tracking-tight">Josue Balderrama</h1>
+            <p class="text-slate-300">BIM Specialist • Innovation Manager</p>
+          </div>
+          <div class="mt-6 grid gap-2 text-sm">
+            <div class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> <a class="underline-offset-2 hover:underline" href="mailto:josue.balderrama@hermosillo.com">josue.balderrama@hermosillo.com</a></div>
+            <div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> <a class="underline-offset-2 hover:underline" href="tel:+528441226347">+52 (844) 122 6347</a></div>
+            <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> Monterrey, MX</div>
+          </div>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button id="saveVcf" class="px-4 py-2 rounded-xl bg-white text-hmo-navy font-semibold hover:opacity-90">Save Contact (.vcf)</button>
+            <a href="https://www.linkedin.com/in/josuebalderrama/" target="_blank" class="px-4 py-2 rounded-xl border border-white/30 hover:bg-white/10">LinkedIn</a>
+            <a href="#showcase" class="px-4 py-2 rounded-xl bg-hmo-orange text-white font-semibold hover:opacity-90">See Demos</a>
+          </div>
+        </div>
+        <p class="text-xs text-slate-500 mt-3">Scan the QR or tap an NFC card to open this page anywhere.</p>
+        <div class="mt-4 flex items-center gap-4">
+          <canvas id="qr" class="rounded-2xl border border-slate-200"></canvas>
+          <div>
+            <p class="text-sm text-slate-600">Link:</p>
+            <code id="linkCode" class="text-xs bg-slate-100 px-2 py-1 rounded">(auto)</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Why this is different -->
+      <div>
+        <h2 class="text-2xl font-extrabold tracking-tight">A business card that actually does things.</h2>
+        <p class="mt-3 text-slate-600">This digital card isn’t a static vCard. It’s an interactive microsite with live demos, an AR spot, and a one‑tap <span class="font-semibold">Save Contact</span>. Designed in Hermosillo’s brand language so your physical card and digital identity feel like one.</p>
+        <div class="mt-6 flex flex-wrap gap-2">
+          <span class="pill">⚡ NFC + Dynamic QR</span>
+          <span class="pill">📊 Live dashboards</span>
+          <span class="pill">🧠 AI intro bot (optional)</span>
+          <span class="pill">🛠️ ACC / APS demos</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE -->
+  <section id="showcase" class="bg-hmo-gray py-12">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-baseline justify-between">
+        <h3 class="text-xl font-bold">Showcase — Innovation in Action</h3>
+        <a href="https://conferences.autodesk.com/flow/autodesk/au2025/sessioncatalog/page/inperson/session/1744090156490001WazM" target="_blank" class="text-hmo-orange text-sm font-semibold">AU 2025 →</a>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        <!-- Card 1 -->
+        <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
+          <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">Dashboard Preview</div>
+          <div class="p-4">
+            <h4 class="font-semibold">ACC Dashboards Overnight</h4>
+            <p class="text-sm text-slate-600">Automated data pipelines from ACC to live dashboards. Nightly refresh, zero manual work.</p>
+            <a class="text-hmo-orange font-semibold text-sm" href="#" target="_blank">Open demo</a>
+          </div>
+        </article>
+        <!-- Card 2 -->
+        <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
+          <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">One‑Click Project Setup</div>
+          <div class="p-4">
+            <h4 class="font-semibold">ACC Project Setup (1‑Click)</h4>
+            <p class="text-sm text-slate-600">Templates configure permissions, folders, issues, reviews, and Build sheets automatically.</p>
+            <a class="text-hmo-orange font-semibold text-sm" href="#" target="_blank">Open demo</a>
+          </div>
+        </article>
+        <!-- Card 3 -->
+        <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
+          <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">Parametric Budgeting</div>
+          <div class="p-4">
+            <h4 class="font-semibold">Parametric Budgeting</h4>
+            <p class="text-sm text-slate-600">Phone‑style UI with live 3D preview and cost breakdown. Built for rapid scenario testing.</p>
+            <a class="text-hmo-orange font-semibold text-sm" href="#" target="_blank">Open demo</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- AR SPOT -->
+  <section id="ar" class="py-12">
+    <div class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-center">
+      <div>
+        <h3 class="text-xl font-bold">AR Spot — See it in your space</h3>
+        <p class="mt-2 text-slate-600">Scan the QR to launch a WebAR demo (e.g., tilt‑up panel or an interactive asset dashboard). Swap the link below with your 8thWall/A-Frame/Three.js scene.</p>
+        <div class="mt-4 flex gap-3">
+          <a id="arLink" href="https://example.com/webar-demo" target="_blank" class="px-4 py-2 rounded-xl bg-hmo-orange text-white font-semibold">Launch AR Demo</a>
+          <a href="#" class="px-4 py-2 rounded-xl border border-slate-300">How it works</a>
+        </div>
+      </div>
+      <div class="rounded-2xl border border-slate-200 p-6">
+        <div class="aspect-video bg-slate-100 grid place-items-center text-slate-500 rounded-xl">AR Placeholder / Poster</div>
+        <p class="text-xs text-slate-500 mt-3">Tip: include a simple marker/target image here for fallback tracking.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="bg-hmo-navy text-white py-12">
+    <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h3 class="text-2xl font-extrabold tracking-tight">Let’s connect</h3>
+        <p class="mt-2 text-white/80">Open to collabs around ACC automations, APS integrations, and BIM/VDC innovation.</p>
+        <div class="mt-6 grid gap-2 text-sm">
+          <div class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> <a class="hover:underline" href="mailto:josue.balderrama@hermosillo.com">josue.balderrama@hermosillo.com</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> <a class="hover:underline" href="tel:+528441226347">+52 (844) 122 6347</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4"></i> <a class="hover:underline" href="https://hermosillo.com" target="_blank">hermosillo.com</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="linkedin" class="w-4 h-4"></i> <a class="hover:underline" href="https://www.linkedin.com/in/josuebalderrama/" target="_blank">LinkedIn</a></div>
+        </div>
+      </div>
+      <div class="bg-white text-slate-800 rounded-2xl p-6 shadow-soft">
+        <h4 class="font-semibold">Share this card</h4>
+        <p class="text-sm text-slate-600">Tap the NFC card or scan the QR. You can also copy the link below.</p>
+        <div class="mt-4 flex items-center gap-2">
+          <input id="shareUrl" class="flex-1 rounded-xl border border-slate-300 px-3 py-2" value="" readonly>
+          <button id="copyBtn" class="px-3 py-2 rounded-xl bg-hmo-orange text-white font-semibold">Copy</button>
+        </div>
+        <p id="copiedMsg" class="text-xs text-green-600 mt-2 hidden">Copied!</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-8 text-center text-sm text-slate-500">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-center justify-center gap-3">
+        <div class="w-6 h-6 rounded bg-hmo-orange text-white grid place-items-center text-xs font-bold">H</div>
+        <span class="font-semibold">Hermosillo</span>
+        <span>•</span>
+        <span class="font-semibold">Autodesk</span>
+      </div>
+      <p class="mt-2">© <span id="year"></span> Josue Balderrama — Core Innovation</p>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize icons
+    lucide.createIcons();
+
+    // Current page URL for QR + sharing
+    const url = window.location.href;
+    document.getElementById('shareUrl').value = url;
+    document.getElementById('linkCode').textContent = url;
+
+    // QR generation
+    const qr = new QRious({ element: document.getElementById('qr'), value: url, size: 120, level: 'M' });
+
+    // Copy link
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(url);
+      document.getElementById('copiedMsg').classList.remove('hidden');
+      setTimeout(() => document.getElementById('copiedMsg').classList.add('hidden'), 1500);
+    });
+
+    // Save VCF (vCard) dynamically
+    document.getElementById('saveVcf').addEventListener('click', () => {
+      const vcf = `BEGIN:VCARD\nVERSION:3.0\nN:Balderrama;Josue;;;\nFN:Josue Balderrama\nORG:Hermosillo\nTITLE:BIM Specialist; Innovation Manager\nEMAIL;TYPE=INTERNET:josue.balderrama@hermosillo.com\nTEL;TYPE=CELL:+528441226347\nADR;TYPE=WORK:;;Blvd. Antonio L. Rodriguez 2100 Piso 16-01;Monterrey;NL;64650;MX\nURL:${url}\nEND:VCARD`;
+      const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Josue-Balderrama.vcf';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
