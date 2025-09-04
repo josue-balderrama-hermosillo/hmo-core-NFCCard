@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Josue Balderrama — Digital Card</title>
-  <meta name="description" content="BIM/VDC Innovation — Hermosillo. Connect, view demos, and save contact." />
+  <meta name="description" content="BIM/VDC Innovation — Hermosillo & BIM GEN. Connect, view demos, and save contact." />
   <!-- Open Graph -->
   <meta property="og:title" content="Josue Balderrama — Digital Card" />
-  <meta property="og:description" content="BIM/VDC Innovation — Hermosillo. Connect, view demos, and save contact." />
+  <meta property="og:description" content="BIM/VDC Innovation — Hermosillo & BIM GEN. Connect, view demos, and save contact." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://placehold.co/1200x630/png?text=Josue+Balderrama+%7C+Hermosillo" />
+  <meta property="og:image" content="https://placehold.co/1200x630/png?text=Josue+Balderrama+%7C+Hermosillo+%26+BIM+GEN" />
   <meta name="theme-color" content="#FF6A00" />
 
   <!-- Inter font -->
@@ -20,17 +20,7 @@
   <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            hmo: { orange: '#FF6A00', navy: '#2f3b52', gray: '#F5F7FA' }
-          },
-          borderRadius: { '2xl': '1.25rem' },
-          boxShadow: { soft: '0 10px 30px rgba(0,0,0,0.08)' }
-        }
-      }
-    }
+    tailwind.config = { theme: { extend: { borderRadius: { '2xl': '1.25rem' }, boxShadow: { soft: '0 10px 30px rgba(0,0,0,0.08)' } } } }
   </script>
 
   <!-- Icons + QR -->
@@ -38,11 +28,19 @@
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 
   <style>
+    :root { --brand-orange:#FF6A00; --brand-navy:#2f3b52; --brand-gray:#F5F7FA; --mark-bg:var(--brand-orange); }
     body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 
-    /* Orange-box Hermosillo mark (header + hero) */
-    .hmo-logo { background:#FF6A00; border-radius:.5rem; display:grid; place-items:center; overflow:hidden; }
-    .hmo-logo img { width:100%; height:100%; object-fit:contain; object-position:center; }
+    /* Utility classes powered by CSS variables (runtime-themable) */
+    .bg-brand { background-color: var(--brand-orange); }
+    .text-brand { color: var(--brand-orange); }
+    .border-brand { border-color: var(--brand-orange); }
+    .bg-brand-navy { background-color: var(--brand-navy); }
+    .bg-brand-gray { background-color: var(--brand-gray); }
+
+    /* Brand mark box (used for the square behind the main logo) */
+    .brand-mark { background: var(--mark-bg); border-radius:.5rem; display:grid; place-items:center; overflow:hidden; }
+    .brand-mark img { width:100%; height:100%; object-fit:contain; object-position:center; }
 
     /* AU image (rounded, no badge) */
     .au-logo img { height:28px; width:auto; display:block; border-radius:.5rem; }
@@ -51,39 +49,175 @@
     /* Plain logos (footer) */
     .logo-plain { height:24px; width:auto; display:block; object-fit:contain; object-position:center; }
     @media (min-width: 640px) { .logo-plain { height:28px; } }
-  </style>
+  .switch-btn{transition:all .15s ease;border-width:1px}
+.switch-btn.is-inactive img{filter:grayscale(100%);opacity:.6}
+.switch-btn.is-active{border-color:var(--brand-orange);border-width:2px}
+.switch-btn:active{transform:scale(.98)}
+.switch-hint{user-select:none}
+</style>
 </head>
 <body class="bg-white text-slate-800">
   <script>
-    /* === Logo URLs (swap here when you have new assets) === */
-    const HERMOSILLO_LOGO_URL = "https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/H2.png"; // white H on orange
-    const AU_LOGO_URL = "https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/upscalemedia-transformed.png"; // transparent AU
-    const HERMOSILLO_PLAIN_URL = "https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png"; // <- plain logo (no orange box). Replace with your asset.
-    const PARTNER_LOGO_URL = "https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Morado.png"; // <- replace with the logo you want beside “BIM - Gen”
+    /* =============================
+       THEME + CONTENT CONFIGURATION
+       ============================= */
+    const THEMES = {
+      hmo: {
+        key: 'hmo',
+        name: 'HERMOSILLO',
+        tagline: 'Experience Matters®',
+        colors: { orange: '#FF6A00', navy: '#2f3b52', gray: '#F5F7FA' },
+        markBg: 'var(--brand-orange)',
+        logos: {
+          mark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/H2.png',
+          wordmark: 'https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png'
+        },
+        site: { url: 'https://hermosillo.com', label: 'hermosillo.com' },
+        partner: { name: 'BIM • GEN', url: 'https://bim-gen.com', logo: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Morado.png' },
+        contact: {
+          name: 'Josue Balderrama',
+          org: 'Hermosillo',
+          titles: 'Core Innovation Lead; Innovation Manager; BIM Specialist',
+          email: 'josue.balderrama@hermosillo.com',
+          phone: '+528441226347',
+          address: {
+            street: 'Blvd. Antonio L. Rodriguez 2100 Piso 16-01', city: 'Monterrey', region: 'NL', postal: '64650', country: 'MX'
+          }
+        },
+        heroOrgLine: 'Hermosillo — Design & Construction'
+      },
+      bimgen: {
+        key: 'bimgen',
+        name: 'BIM • GEN',
+        tagline: 'Automation & AI',
+        colors: { orange: '#7C3AED', navy: '#0f172a', gray: '#F6F7FB' }, // violet + slate-900
+        markBg: 'var(--brand-orange)',
+        logos: {
+          mark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Morado.png',
+          wordmark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Morado.png'
+        },
+        site: { url: 'https://bim-gen.com', label: 'bim-gen.com' },
+        partner: { name: 'Hermosillo', url: 'https://hermosillo.com', logo: 'https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png' },
+        contact: {
+          name: 'Josue Balderrama',
+          org: 'BIM GEN',
+          titles: 'Partner; Innovation & BIM',
+          email: 'REPLACE_ME@bim-gen.com', // ← update when you have the official inbox
+          phone: '+528441226347',
+          address: {
+            street: 'Blvd. Antonio L. Rodriguez 2100 Piso 16-01', city: 'Monterrey', region: 'NL', postal: '64650', country: 'MX'
+          }
+        },
+        heroOrgLine: 'BIM GEN — Consulting & Automation'
+      }
+    };
+
+    // Helpers
+    const $ = (sel) => document.querySelector(sel);
+    const setVar = (k, v) => document.documentElement.style.setProperty(k, v);
+
+    let currentThemeKey = (new URLSearchParams(location.search)).get('brand') || localStorage.getItem('brand') || 'hmo';
+    if (!THEMES[currentThemeKey]) currentThemeKey = 'hmo';
+
+    function applyTheme(key) {
+      const t = THEMES[key];
+      currentThemeKey = key;
+      localStorage.setItem('brand', key);
+
+      // Colors as CSS variables (for runtime swap)
+      setVar('--brand-orange', t.colors.orange);
+      setVar('--brand-navy', t.colors.navy);
+      setVar('--brand-gray', t.colors.gray);
+      setVar('--mark-bg', t.markBg);
+
+      // Header brand
+      $('#brandName').textContent = t.name;
+      $('#brandTagline').textContent = t.tagline;
+
+      // Logos
+      $('#logoSmall').src = t.logos.mark;
+      $('#logoHero').src  = t.logos.mark;
+      $('#auLogo').src    = 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/upscalemedia-transformed.png';
+
+      // Footer + partner swap
+      $('#logoFooterMain').src = t.logos.wordmark;
+      $('#logoFooterMainLink').href = t.site.url;
+      $('#partnerLogo').src = t.partner.logo;
+      $('#partnerLogoLink').href = t.partner.url;
+
+      // Contact (hero + contact section)
+      $('#nameText').textContent = t.contact.name;
+      $('#titlesText').textContent = t.contact.titles;
+      $('#orgLine').textContent = t.heroOrgLine;
+      $('#taglineHero').textContent = t.tagline;
+
+      $('#mailLink').href = `mailto:${t.contact.email}`;
+      $('#mailLink').textContent = t.contact.email;
+      $('#phoneLink').href = `tel:${t.contact.phone}`;
+      $('#phoneLink').textContent = formatPhone(t.contact.phone);
+      $('#siteLink').href = t.site.url; $('#siteLink').textContent = t.site.label;
+
+      // vCard builder uses current theme on click
+
+      // Update URL (without reload) to keep sharable theme param
+      const url = new URL(location.href);
+      url.searchParams.set('brand', key);
+      history.replaceState({}, '', url);
+
+      // Share field + QR refresh to themed URL
+      const shareUrl = url.toString();
+      $('#shareUrl').value = shareUrl;
+      $('#linkCode').textContent = shareUrl;
+      if (window.__qrInstance) { window.__qrInstance.set({ value: shareUrl }); }
+
+      // Update active state on selector
+      $('#themeSelect').value = key;
+    }
+
+    function formatPhone(p) { return p.replace(/^\+52(\d{3})(\d{3})(\d{4})$/, '+52 ($1) $2 $3'); }
   </script>
 
   <!-- NAV / HEADER -->
   <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <!-- Hermosillo logo in orange square (from URL) -->
-        <div class="w-7 h-7 hmo-logo">
-          <img id="logoSmall" alt="Hermosillo" />
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <!-- Brand mark (square in theme color) -->
+        <div class="w-7 h-7 brand-mark">
+          <img id="logoSmall" alt="Brand mark" />
         </div>
-        <span class="font-extrabold tracking-tight">HERMOSILLO</span>
-        <span class="text-hmo-orange font-semibold">• Experience Matters</span>
+        <div class="truncate">
+          <span id="brandName" class="font-extrabold tracking-tight"></span>
+          <span class="text-slate-400">•</span>
+          <span id="brandTagline" class="text-brand font-semibold"></span>
+        </div>
       </div>
 
       <nav class="hidden sm:flex items-center gap-4 text-sm">
-        <a href="#showcase" class="hover:text-hmo-orange">Demos</a>
-        <a href="#ar" class="hover:text-hmo-orange">AR</a>
-        <a href="#contact" class="hover:text-hmo-orange">Contact</a>
+        <a href="#showcase" class="hover:text-brand">Demos</a>
+        <a href="#ar" class="hover:text-brand">AR</a>
+        <a href="#contact" class="hover:text-brand">Contact</a>
       </nav>
 
-      <!-- AU logo (image, no colored background) -->
-      <div class="hidden sm:flex items-center gap-2 au-logo">
-        <span class="text-xs text-slate-500">AU 2025 Speaker</span>
-        <img id="auLogo" alt="Autodesk University" />
+      <!-- Theme selector + AU logo -->
+      <div class="flex items-center gap-3">
+        <div class="flex flex-col items-end gap-1">
+          <span class="switch-hint text-[11px] text-slate-500 hidden sm:inline">Tap a logo to switch</span>
+          <div id="brandSwitch" class="flex items-center gap-2">
+            <button id="btnHmo" class="switch-btn is-inactive inline-flex items-center gap-2 rounded-xl border border-slate-300 px-2 py-1 bg-white" type="button" aria-pressed="false" title="Switch to Hermosillo">
+              <img id="btnHmoImg" class="h-6 w-auto" alt="Hermosillo logo"/>
+              <span class="text-xs font-semibold hidden sm:inline">Hermosillo</span>
+            </button>
+            <button id="btnBimgen" class="switch-btn is-inactive inline-flex items-center gap-2 rounded-xl border border-slate-300 px-2 py-1 bg-white" type="button" aria-pressed="false" title="Switch to BIM GEN">
+              <img id="btnBimgenImg" class="h-6 w-auto" alt="BIM GEN logo"/>
+              <span class="text-xs font-semibold hidden sm:inline">BIM • GEN</span>
+            </button>
+          </div>
+        </div>
+        <div class="hidden sm:flex items-center gap-2 au-logo">
+          <span class="text-xs text-slate-500">AU 2025 Speaker</span>
+          <img id="auLogo" alt="Autodesk University" />
+        </div>
+      </div>
       </div>
     </div>
   </header>
@@ -93,34 +227,34 @@
     <div class="max-w-6xl mx-auto px-4 py-12 grid lg:grid-cols-2 gap-10 items-center">
       <!-- Left: Card visual -->
       <div>
-        <div class="bg-hmo-navy text-white rounded-2xl p-6 shadow-soft relative overflow-hidden">
+        <div class="bg-brand-navy text-white rounded-2xl p-6 shadow-soft relative overflow-hidden">
           <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5"></div>
           <div class="flex items-center gap-4">
-            <!-- Big Hermosillo mark in orange square -->
-            <div class="w-12 h-12 hmo-logo">
-              <img id="logoHero" alt="Hermosillo" />
+            <!-- Big brand mark in square -->
+            <div class="w-12 h-12 brand-mark">
+              <img id="logoHero" alt="Brand" />
             </div>
-            <div>
-              <p class="text-sm text-slate-300">Hermosillo — Design & Construction</p>
-              <p class="text-xs text-hmo-orange font-semibold">Experience Matters®</p>
+            <div class="min-w-0">
+              <p id="orgLine" class="text-sm text-slate-300"></p>
+              <p id="taglineHero" class="text-xs text-brand font-semibold"></p>
             </div>
           </div>
 
           <div class="mt-6">
-            <h1 class="text-3xl font-extrabold tracking-tight">Josue Balderrama</h1>
-            <p class="text-slate-300">Core Innovation Lead • Innovation Specialist• BIM Specialist</p>
+            <h1 id="nameText" class="text-3xl font-extrabold tracking-tight">Josue Balderrama</h1>
+            <p id="titlesText" class="text-slate-300">Core Innovation Lead • Innovation Manager • BIM Specialist</p>
           </div>
 
           <div class="mt-6 grid gap-2 text-sm">
-            <div class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> <a class="underline-offset-2 hover:underline" href="mailto:josue.balderrama@hermosillo.com">josue.balderrama@hermosillo.com</a></div>
-            <div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> <a class="underline-offset-2 hover:underline" href="tel:+528441226347">+52 (844) 122 6347</a></div>
+            <div class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> <a id="mailLink" class="underline-offset-2 hover:underline" href="#">email</a></div>
+            <div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> <a id="phoneLink" class="underline-offset-2 hover:underline" href="#">phone</a></div>
             <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> Monterrey, MX</div>
           </div>
 
           <div class="mt-6 flex flex-wrap gap-3">
-            <button id="saveVcf" class="px-4 py-2 rounded-xl bg-white text-hmo-navy font-semibold hover:opacity-90">Save Contact (.vcf)</button>
+            <button id="saveVcf" class="px-4 py-2 rounded-xl bg-white text-slate-900 font-semibold hover:opacity-90">Save Contact (.vcf)</button>
             <a href="https://www.linkedin.com/in/josuebalderrama/" target="_blank" class="px-4 py-2 rounded-xl border border-white/30 hover:bg-white/10">LinkedIn</a>
-            <a href="#showcase" class="px-4 py-2 rounded-xl bg-hmo-orange text-white font-semibold hover:opacity-90">See Demos</a>
+            <a href="#showcase" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold hover:opacity-90">See Demos</a>
           </div>
         </div>
 
@@ -139,7 +273,7 @@
         <h2 class="text-2xl font-extrabold tracking-tight">A business card that actually does things.</h2>
         <p class="mt-3 text-slate-600">
           This digital card isn’t a static vCard. It’s an interactive microsite with live demos, an AR spot, and a one-tap
-          <span class="font-semibold">Save Contact</span>. Designed in Hermosillo’s brand language so your physical card and digital identity feel like one.
+          <span class="font-semibold">Save Contact</span>. Switch the focus brand in the header to change colors, logos, and contact data.
         </p>
         <div class="mt-6 flex flex-wrap gap-2">
           <span class="pill inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 text-slate-700">⚡ NFC + Dynamic QR</span>
@@ -152,11 +286,11 @@
   </section>
 
   <!-- SHOWCASE -->
-  <section id="showcase" class="bg-hmo-gray py-12">
+  <section id="showcase" class="bg-brand-gray py-12">
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex items-baseline justify-between">
         <h3 class="text-xl font-bold">Showcase — Innovation in Action</h3>
-        <a href="https://conferences.autodesk.com/flow/autodesk/au2025/sessioncatalog/page/inperson/session/1744090156490001WazM" target="_blank" class="text-hmo-orange text-sm font-semibold">AU 2025 →</a>
+        <a href="https://conferences.autodesk.com/flow/autodesk/au2025/sessioncatalog/page/inperson/session/1744090156490001WazM" target="_blank" class="text-brand text-sm font-semibold">AU 2025 →</a>
       </div>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         <!-- Card 1 -->
@@ -165,7 +299,7 @@
           <div class="p-4">
             <h4 class="font-semibold">ACC Dashboards Overnight</h4>
             <p class="text-sm text-slate-600">Automated data pipelines from ACC to live dashboards. Nightly refresh, zero manual work.</p>
-            <a class="text-hmo-orange font-semibold text-sm" href="#" target="_blank">Open demo</a>
+            <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
           </div>
         </article>
         <!-- Card 2 -->
@@ -174,7 +308,7 @@
           <div class="p-4">
             <h4 class="font-semibold">ACC Project Setup (1-Click)</h4>
             <p class="text-sm text-slate-600">Templates configure permissions, folders, issues, reviews, and Build sheets automatically.</p>
-            <a class="text-hmo-orange font-semibold text-sm" href="#" target="_blank">Open demo</a>
+            <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
           </div>
         </article>
         <!-- Card 3 -->
@@ -183,7 +317,7 @@
           <div class="p-4">
             <h4 class="font-semibold">Parametric Budgeting</h4>
             <p class="text-sm text-slate-600">Phone-style UI with live 3D preview and cost breakdown. Built for rapid scenario testing.</p>
-            <a class="text-hmo-orange font-semibold text-sm" href="#" target="_blank">Open demo</a>
+            <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
           </div>
         </article>
       </div>
@@ -197,7 +331,7 @@
         <h3 class="text-xl font-bold">AR Spot — See it in your space</h3>
         <p class="mt-2 text-slate-600">Scan the QR to launch a WebAR demo (e.g., tilt-up panel or an interactive asset dashboard). Swap the link below with your 8thWall/A-Frame/Three.js scene.</p>
         <div class="mt-4 flex gap-3">
-          <a id="arLink" href="https://example.com/webar-demo" target="_blank" class="px-4 py-2 rounded-xl bg-hmo-orange text-white font-semibold">Launch AR Demo</a>
+          <a id="arLink" href="https://example.com/webar-demo" target="_blank" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR Demo</a>
           <a href="#" class="px-4 py-2 rounded-xl border border-slate-300">How it works</a>
         </div>
       </div>
@@ -209,15 +343,15 @@
   </section>
 
   <!-- CONTACT -->
-  <section id="contact" class="bg-hmo-navy text-white py-12">
+  <section id="contact" class="bg-brand-navy text-white py-12">
     <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
       <div>
         <h3 class="text-2xl font-extrabold tracking-tight">Let’s connect</h3>
         <p class="mt-2 text-white/80">Open to collabs around ACC automations, APS integrations, and BIM/VDC innovation.</p>
         <div class="mt-6 grid gap-2 text-sm">
-          <div class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> <a class="hover:underline" href="mailto:josue.balderrama@hermosillo.com">josue.balderrama@hermosillo.com</a></div>
-          <div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> <a class="hover:underline" href="tel:+528441226347">+52 (844) 122 6347</a></div>
-          <div class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4"></i> <a class="hover:underline" href="https://hermosillo.com" target="_blank">hermosillo.com</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> <a id="mailLink2" class="hover:underline" href="#">email</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> <a id="phoneLink2" class="hover:underline" href="#">phone</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4"></i> <a id="siteLink" class="hover:underline" href="#" target="_blank">site</a></div>
           <div class="flex items-center gap-2"><i data-lucide="linkedin" class="w-4 h-4"></i> <a class="hover:underline" href="https://www.linkedin.com/in/josuebalderrama/" target="_blank">LinkedIn</a></div>
         </div>
       </div>
@@ -226,87 +360,107 @@
         <p class="text-sm text-slate-600">Tap the NFC card or scan the QR. You can also copy the link below.</p>
         <div class="mt-4 flex items-center gap-2">
           <input id="shareUrl" class="flex-1 rounded-xl border border-slate-300 px-3 py-2" value="" readonly>
-          <button id="copyBtn" class="px-3 py-2 rounded-xl bg-hmo-orange text-white font-semibold">Copy</button>
+          <button id="copyBtn" class="px-3 py-2 rounded-xl bg-brand text-white font-semibold">Copy</button>
         </div>
         <p id="copiedMsg" class="text-xs text-green-600 mt-2 hidden">Copied!</p>
       </div>
     </div>
   </section>
 
-<!-- FOOTER -->
-<footer class="py-8 text-center text-sm text-slate-500">
-  <div class="max-w-6xl mx-auto px-4">
-    <div class="flex items-center justify-center gap-3">
-      <!-- Hermosillo plain wordmark (clickable) -->
-      <a href="https://hermosillo.com" target="_blank" rel="noopener">
-        <img id="logoFooterPlain" class="logo-plain h-6 sm:h-7" alt="Hermosillo" />
-      </a>
-      <span class="font-semibold"></span>
-      <span>•</span>
-      <span class="font-semibold"></span>
-      <!-- Partner logo (clickable) -->
-      <a href="https://bim-gen.com" target="_blank" rel="noopener">
-        <img id="partnerLogo" class="h-14 w-auto object-contain" alt="Partner logo" />
-      </a>
+  <!-- FOOTER -->
+  <footer class="py-8 text-center text-sm text-slate-500">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-center justify-center gap-3">
+        <!-- Main brand wordmark (clickable) -->
+        <a id="logoFooterMainLink" href="#" target="_blank" rel="noopener">
+          <img id="logoFooterMain" class="logo-plain h-6 sm:h-7" alt="Main brand" />
+        </a>
+        <span>•</span>
+        <!-- Partner logo (clickable) -->
+        <a id="partnerLogoLink" href="#" target="_blank" rel="noopener">
+          <img id="partnerLogo" class="h-14 w-auto object-contain" alt="Partner logo" />
+        </a>
+      </div>
+      <p class="mt-2">© <span id="year"></span> Josue Balderrama — Core Innovation Lead</p>
     </div>
-    <p class="mt-2">© <span id="year"></span> Josue Balderrama — Core Innovation Lead</p>
-  </div>
-</footer>
-
-
-
-
+  </footer>
 
   <script>
     // Icons
     lucide.createIcons();
 
-    // Inject logo URLs
-    document.getElementById('logoSmall').src  = HERMOSILLO_LOGO_URL;   // header (orange box)
-    document.getElementById('logoHero').src   = HERMOSILLO_LOGO_URL;   // hero (orange box)
-    document.getElementById('auLogo').src     = AU_LOGO_URL;           // AU rounded
-    document.getElementById('logoFooterPlain').src = HERMOSILLO_PLAIN_URL; // footer plain wordmark
-    document.getElementById('partnerLogo').src     = PARTNER_LOGO_URL;      // beside BIM - Gen
+    // QR init (store instance for later updates)
+    const qrElem = document.getElementById('qr');
+    window.__qrInstance = new QRious({ element: qrElem, value: location.href, size: 120, level: 'M' });
 
-    // Current page URL for QR + sharing
-    const url = window.location.href;
-    document.getElementById('shareUrl').value = url;
-    document.getElementById('linkCode').textContent = url;
-
-    // QR generation
-    const qr = new QRious({ element: document.getElementById('qr'), value: url, size: 120, level: 'M' });
+    // Share URL init (will be overwritten by applyTheme)
+    document.getElementById('shareUrl').value = location.href;
+    document.getElementById('linkCode').textContent = location.href;
 
     // Copy link
     document.getElementById('copyBtn').addEventListener('click', async () => {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(document.getElementById('shareUrl').value);
       document.getElementById('copiedMsg').classList.remove('hidden');
       setTimeout(() => document.getElementById('copiedMsg').classList.add('hidden'), 1500);
     });
 
-    // Save VCF (vCard) dynamically
+    // Brand switch buttons + UI state
+function updateSwitchUI(key){
+  const h=document.getElementById('btnHmo');
+  const b=document.getElementById('btnBimgen');
+  [h,b].forEach(btn=>{btn.classList.remove('is-active');btn.classList.add('is-inactive');btn.setAttribute('aria-pressed','false');});
+  const active = key==='bimgen'? b : h;
+  active.classList.add('is-active');
+  active.classList.remove('is-inactive');
+  active.setAttribute('aria-pressed','true');
+}
+// Set button logos
+try{
+  document.getElementById('btnHmoImg').src = THEMES.hmo.logos.mark;
+  document.getElementById('btnBimgenImg').src = THEMES.bimgen.logos.mark;
+}catch{ /* ignore if DOM not yet parsed */ }
+// Click handlers
+const btnHmo = document.getElementById('btnHmo');
+const btnBimgen = document.getElementById('btnBimgen');
+if(btnHmo) btnHmo.addEventListener('click', ()=>applyTheme('hmo'));
+if(btnBimgen) btnBimgen.addEventListener('click', ()=>applyTheme('bimgen'));
+
+    // Save VCF (vCard) dynamically using active theme
+    function buildVCard(t) {
+      const a = t.contact.address;
+      return `BEGIN:VCARD\nVERSION:3.0\nN:${t.contact.name.split(' ').slice(-1)[0]};${t.contact.name.split(' ').slice(0,-1).join(' ')};;;\nFN:${t.contact.name}\nORG:${t.contact.org}\nTITLE:${t.contact.titles}\nEMAIL;TYPE=INTERNET:${t.contact.email}\nTEL;TYPE=CELL:${t.contact.phone}\nADR;TYPE=WORK:;;${a.street};${a.city};${a.region};${a.postal};${a.country}\nURL:${location.href}\nEND:VCARD`;
+    }
+
     document.getElementById('saveVcf').addEventListener('click', () => {
-      const vcf =
-`BEGIN:VCARD
-VERSION:3.0
-N:Balderrama;Josue;;;
-FN:Josue Balderrama
-ORG:Hermosillo
-TITLE:Core Innovation Lead; Innovation Manager; BIM Specialist
-EMAIL;TYPE=INTERNET:josue.balderrama@hermosillo.com
-TEL;TYPE=CELL:+528441226347
-ADR;TYPE=WORK:;;Blvd. Antonio L. Rodriguez 2100 Piso 16-01;Monterrey;NL;64650;MX
-URL:${url}
-END:VCARD`;
+      const t = THEMES[currentThemeKey];
+      const vcf = buildVCard(t);
       const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'Josue-Balderrama.vcf';
+      a.download = `Contact-${t.contact.org.replace(/\s+/g,'')}.vcf`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     });
 
-    // Year
+    // Boot
+    applyTheme(currentThemeKey);
+    try{ updateSwitchUI(currentThemeKey); }catch{}
+
+    // Footer year
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Mirror mail/phone to contact section
+    const syncContacts = () => {
+      const t = THEMES[currentThemeKey];
+      document.getElementById('mailLink2').href = `mailto:${t.contact.email}`;
+      document.getElementById('mailLink2').textContent = t.contact.email;
+      document.getElementById('phoneLink2').href = `tel:${t.contact.phone}`;
+      document.getElementById('phoneLink2').textContent = (t.contact.phone);
+    };
+    syncContacts();
+    // Re-sync on theme change (monkey-patch applyTheme to also sync)
+    const _applyThemeOrig = applyTheme;
+    applyTheme = function(key){ _applyThemeOrig(key); syncContacts(); };
   </script>
 </body>
 </html>
