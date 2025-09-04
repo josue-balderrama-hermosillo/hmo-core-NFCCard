@@ -38,7 +38,7 @@
     .bg-brand-navy { background-color: var(--brand-navy); }
     .bg-brand-gray { background-color: var(--brand-gray); }
 
-    /* Brand mark box (used for the square behind the main logo) */
+    /* Brand mark box */
     .brand-mark { background: var(--mark-bg); border-radius:.5rem; display:grid; place-items:center; overflow:hidden; }
     .brand-mark img { width:100%; height:100%; object-fit:contain; object-position:center; }
 
@@ -46,19 +46,19 @@
     .au-logo img { height:28px; width:auto; display:block; border-radius:.5rem; }
     @media (min-width: 640px) { .au-logo img { height:32px; } }
 
-    /* Plain logos (footer) */
+    /* Footer logos */
     .logo-plain { height:24px; width:auto; display:block; object-fit:contain; object-position:center; }
     @media (min-width: 640px) { .logo-plain { height:28px; } }
-  .switch-btn{transition:all .15s ease;border-width:1px}
-.switch-btn img{filter:grayscale(100%) brightness(.38)} /* make all switch logos neutral grey */
-#btnHmoImg{filter:grayscale(100%) brightness(.38)!important} /* Hermosillo asset was white -> make it grey */
-.switch-btn.is-inactive img{opacity:.75}
-.switch-btn.is-active{border-color:var(--brand-orange);border-width:2px}
-.switch-btn:active{transform:scale(.98)}
-.switch-hint{user-select:none}
-.footer-logo{height:28px;width:auto;display:block}
-@media (min-width:640px){.footer-logo{height:32px}}
-</style>
+    .switch-btn{transition:all .15s ease;border-width:1px}
+    .switch-btn img{filter:grayscale(100%) brightness(.38)} /* neutral grey */
+    #btnHmoImg{filter:grayscale(100%) brightness(.38)!important}
+    .switch-btn.is-inactive img{opacity:.75}
+    .switch-btn.is-active{border-color:var(--brand-orange);border-width:2px}
+    .switch-btn:active{transform:scale(.98)}
+    .switch-hint{user-select:none}
+    .footer-logo{height:28px;width:auto;display:block}
+    @media (min-width:640px){.footer-logo{height:32px}}
+  </style>
 </head>
 <body class="bg-white text-slate-800">
   <script>
@@ -75,7 +75,7 @@
         logos: {
           mark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/H2.png',
           wordmark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/H2.png',
-          footer: 'https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png' // optional footer-only wordmark (transparent background). Set URL when available.
+          footer: 'https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png'
         },
         site: { url: 'https://hermosillo.com', label: 'hermosillo.com' },
         partner: { name: 'BIM • GEN', url: 'https://bim-gen.com', logo: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Morado.png' },
@@ -95,7 +95,7 @@
         key: 'bimgen',
         name: 'BIM • GEN',
         tagline: 'Automation / Generative Design / Data / AI',
-        colors: { orange: '#7C3AED', navy: '#0f172a', gray: '#F6F7FB' }, // violet + slate-900
+        colors: { orange: '#7C3AED', navy: '#0f172a', gray: '#F6F7FB' },
         markBg: 'var(--brand-orange)',
         logos: {
           mark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Blanco.png',
@@ -108,7 +108,7 @@
           name: 'Josue Balderrama',
           org: 'BIM GEN',
           titles: 'Co-Founder | Innovation & BIM',
-          email: 'j.balderrama@bim-gen.com', // ← update when you have the official inbox
+          email: 'j.balderrama@bim-gen.com',
           phone: '+528441226347',
           address: {
             street: 'Colina Brillante', city: 'Monterrey', region: 'NL', postal: '64650', country: 'MX'
@@ -163,21 +163,18 @@
       $('#phoneLink').textContent = formatPhone(t.contact.phone);
       $('#siteLink').href = t.site.url; $('#siteLink').textContent = t.site.label;
 
-      // vCard builder uses current theme on click
-
-      // Update URL (without reload) to keep sharable theme param
+      // Update URL param for sharing
       const url = new URL(location.href);
       url.searchParams.set('brand', key);
       history.replaceState({}, '', url);
 
-      // Share field + QR refresh to themed URL
       const shareUrl = url.toString();
       $('#shareUrl').value = shareUrl;
       $('#linkCode').textContent = shareUrl;
       if (window.__qrInstance) { window.__qrInstance.set({ value: shareUrl }); }
 
-      // Update active state on selector
-      $('#themeSelect').value = key;
+      // Update switch UI
+      if (typeof updateSwitchUI === 'function') updateSwitchUI(key);
     }
 
     function formatPhone(p) { return p.replace(/^\+52(\d{3})(\d{3})(\d{4})$/, '+52 ($1) $2 $3'); }
@@ -204,7 +201,7 @@
         <a href="#contact" class="hover:text-brand">Contact</a>
       </nav>
 
-      <!-- Theme selector + AU logo -->
+      <!-- Switch buttons + AU logo -->
       <div class="flex items-center gap-3">
         <div class="flex flex-col items-end gap-1">
           <span class="switch-hint text-[11px] text-slate-500 hidden sm:inline">Tap a logo to switch</span>
@@ -223,7 +220,6 @@
           <span class="text-xs text-slate-500">AU 2025 Speaker</span>
           <img id="auLogo" alt="Autodesk University" />
         </div>
-      </div>
       </div>
     </div>
   </header>
@@ -298,7 +294,8 @@
         <h3 class="text-xl font-bold">Showcase — Innovation in Action</h3>
         <a href="https://conferences.autodesk.com/flow/autodesk/au2025/sessioncatalog/page/inperson/session/1744090156490001WazM" target="_blank" class="text-brand text-sm font-semibold">AU 2025 →</a>
       </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <!-- Changed grid to 4 cols on XL -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
         <!-- Card 1 -->
         <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
           <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">Dashboard Preview</div>
@@ -323,6 +320,18 @@
           <div class="p-4">
             <h4 class="font-semibold">Parametric Budgeting</h4>
             <p class="text-sm text-slate-600">Phone-style UI with live 3D preview and cost breakdown. Built for rapid scenario testing.</p>
+            <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
+          </div>
+        </article>
+        <!-- Card 4 -->
+        <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
+          <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">Generative Design</div>
+          <div class="p-4">
+            <h4 class="font-semibold">Generative Design (AEC)</h4>
+            <p class="text-sm text-slate-600">
+              Rapid optioneering: generate & score 100s of layout options by constraints (site, program, daylight, distance).
+              Export best fits to Revit/TestFit.
+            </p>
             <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
           </div>
         </article>
@@ -395,11 +404,11 @@
     // Icons
     lucide.createIcons();
 
-    // QR init (store instance for later updates)
+    // QR init
     const qrElem = document.getElementById('qr');
     window.__qrInstance = new QRious({ element: qrElem, value: location.href, size: 120, level: 'M' });
 
-    // Share URL init (will be overwritten by applyTheme)
+    // Share URL init
     document.getElementById('shareUrl').value = location.href;
     document.getElementById('linkCode').textContent = location.href;
 
@@ -411,25 +420,25 @@
     });
 
     // Brand switch buttons + UI state
-function updateSwitchUI(key){
-  const h=document.getElementById('btnHmo');
-  const b=document.getElementById('btnBimgen');
-  [h,b].forEach(btn=>{btn.classList.remove('is-active');btn.classList.add('is-inactive');btn.setAttribute('aria-pressed','false');});
-  const active = key==='bimgen'? b : h;
-  active.classList.add('is-active');
-  active.classList.remove('is-inactive');
-  active.setAttribute('aria-pressed','true');
-}
-// Set button logos
-try{
-  document.getElementById('btnHmoImg').src = THEMES.hmo.logos.mark;
-  document.getElementById('btnBimgenImg').src = THEMES.bimgen.logos.mark;
-}catch{ /* ignore if DOM not yet parsed */ }
-// Click handlers
-const btnHmo = document.getElementById('btnHmo');
-const btnBimgen = document.getElementById('btnBimgen');
-if(btnHmo) btnHmo.addEventListener('click', ()=>applyTheme('hmo'));
-if(btnBimgen) btnBimgen.addEventListener('click', ()=>applyTheme('bimgen'));
+    function updateSwitchUI(key){
+      const h=document.getElementById('btnHmo');
+      const b=document.getElementById('btnBimgen');
+      [h,b].forEach(btn=>{btn.classList.remove('is-active');btn.classList.add('is-inactive');btn.setAttribute('aria-pressed','false');});
+      const active = key==='bimgen'? b : h;
+      active.classList.add('is-active');
+      active.classList.remove('is-inactive');
+      active.setAttribute('aria-pressed','true');
+    }
+    // Set button logos
+    try{
+      document.getElementById('btnHmoImg').src = THEMES.hmo.logos.mark;
+      document.getElementById('btnBimgenImg').src = THEMES.bimgen.logos.mark;
+    }catch{}
+    // Click handlers
+    const btnHmo = document.getElementById('btnHmo');
+    const btnBimgen = document.getElementById('btnBimgen');
+    if(btnHmo) btnHmo.addEventListener('click', ()=>applyTheme('hmo'));
+    if(btnBimgen) btnBimgen.addEventListener('click', ()=>applyTheme('bimgen'));
 
     // Save VCF (vCard) dynamically using active theme
     function buildVCard(t) {
@@ -464,7 +473,7 @@ if(btnBimgen) btnBimgen.addEventListener('click', ()=>applyTheme('bimgen'));
       document.getElementById('phoneLink2').textContent = (t.contact.phone);
     };
     syncContacts();
-    // Re-sync on theme change (monkey-patch applyTheme to also sync)
+    // Re-sync on theme change
     const _applyThemeOrig = applyTheme;
     applyTheme = function(key){ _applyThemeOrig(key); syncContacts(); };
   </script>
