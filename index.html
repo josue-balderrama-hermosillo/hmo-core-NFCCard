@@ -50,10 +50,14 @@
     .logo-plain { height:24px; width:auto; display:block; object-fit:contain; object-position:center; }
     @media (min-width: 640px) { .logo-plain { height:28px; } }
   .switch-btn{transition:all .15s ease;border-width:1px}
-.switch-btn.is-inactive img{filter:grayscale(100%);opacity:.6}
+.switch-btn img{filter:grayscale(100%) brightness(.38)} /* make all switch logos neutral grey */
+#btnHmoImg{filter:grayscale(100%) brightness(.38)!important} /* Hermosillo asset was white -> make it grey */
+.switch-btn.is-inactive img{opacity:.75}
 .switch-btn.is-active{border-color:var(--brand-orange);border-width:2px}
 .switch-btn:active{transform:scale(.98)}
 .switch-hint{user-select:none}
+.footer-logo{height:28px;width:auto;display:block}
+@media (min-width:640px){.footer-logo{height:32px}}
 </style>
 </head>
 <body class="bg-white text-slate-800">
@@ -70,7 +74,8 @@
         markBg: 'var(--brand-orange)',
         logos: {
           mark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/H2.png',
-          wordmark: 'https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png'
+          wordmark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/H2.png',
+          footer: 'https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png' // optional footer-only wordmark (transparent background). Set URL when available.
         },
         site: { url: 'https://hermosillo.com', label: 'hermosillo.com' },
         partner: { name: 'BIM • GEN', url: 'https://bim-gen.com', logo: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Morado.png' },
@@ -93,8 +98,8 @@
         colors: { orange: '#7C3AED', navy: '#0f172a', gray: '#F6F7FB' }, // violet + slate-900
         markBg: 'var(--brand-orange)',
         logos: {
-          mark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Morado.png',
-          wordmark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Morado.png'
+          mark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Blanco.png',
+          wordmark: 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Logo%20BIM%20GEN%20V1%20Blanco.png'
         },
         site: { url: 'https://bim-gen.com', label: 'bim-gen.com' },
         partner: { name: 'Hermosillo', url: 'https://hermosillo.com', logo: 'https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png' },
@@ -140,7 +145,7 @@
       $('#auLogo').src    = 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/upscalemedia-transformed.png';
 
       // Footer + partner swap
-      $('#logoFooterMain').src = t.logos.wordmark;
+      $('#logoFooterMain').src = t.logos.footer || t.logos.wordmark || t.logos.mark;
       $('#logoFooterMainLink').href = t.site.url;
       $('#partnerLogo').src = t.partner.logo;
       $('#partnerLogoLink').href = t.partner.url;
@@ -373,12 +378,12 @@
       <div class="flex items-center justify-center gap-3">
         <!-- Main brand wordmark (clickable) -->
         <a id="logoFooterMainLink" href="#" target="_blank" rel="noopener">
-          <img id="logoFooterMain" class="logo-plain h-6 sm:h-7" alt="Main brand" />
+          <img id="logoFooterMain" class="footer-logo object-contain" alt="Main brand" />
         </a>
         <span>•</span>
         <!-- Partner logo (clickable) -->
         <a id="partnerLogoLink" href="#" target="_blank" rel="noopener">
-          <img id="partnerLogo" class="h-14 w-auto object-contain" alt="Partner logo" />
+          <img id="partnerLogo" class="footer-logo object-contain" alt="Partner logo" />
         </a>
       </div>
       <p class="mt-2">© <span id="year"></span> Josue Balderrama — Core Innovation Lead</p>
