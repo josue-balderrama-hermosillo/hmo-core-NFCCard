@@ -540,7 +540,7 @@
       if (!url || url === 'about:blank') return;
 
       const rect  = card.getBoundingClientRect();
-      const start = { left: rect.left, top: rect.top + window.scrollY, width: rect.width, height: rect.height };
+      const start = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
 
       // Backdrop
       const backdrop = document.createElement('div');
@@ -577,7 +577,7 @@
         width:  Math.round(maxW),
         height: Math.round(maxH),
         left:   Math.round((window.innerWidth - maxW) / 2),
-        top:    Math.round((window.innerHeight - maxH) / 2 + window.scrollY)
+        top:    Math.round((window.innerHeight - maxH) / 2)
       };
 
       requestAnimationFrame(() => {
