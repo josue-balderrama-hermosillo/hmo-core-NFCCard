@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- Tailwind via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.10"></script>
   <script>
     tailwind.config = { theme: { extend: { borderRadius: { '2xl': '1.25rem' }, boxShadow: { soft: '0 10px 30px rgba(0,0,0,0.08)' } } } }
   </script>
@@ -68,7 +68,7 @@
     .expander-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; transition:opacity .25s ease; z-index:100;}
     .expander-backdrop.is-visible{opacity:1;}
     .expander{position:fixed; z-index:110; overflow:hidden; background:#fff; border-radius:1rem; box-shadow:0 10px 30px rgba(0,0,0,.12);}
-    .expander.is-animating{transition: left .38s cubic-bezier(.2,.8,.2,1), top .38s cubic-bezier(.2,.8,.2,1), width .38s cubic-bezier(.2,.8,.2,1), height .38s cubic-bezier(.2,.8,.2,1), border-radius .38s cubic-bezier(.2,.8,.2,1);}
+    .expander.is-animating{transition: left .38s cubic-bezier(.2,.8,.2,1), top .38s cubic-bezier(.2,.8,.2,1), width .38s cubic-bezier(.2,.8,.2,1), height .38s cubic-bezier(.2,.8,.2,1), border-radius .38s cubic-bezier(.2,.8,.2,1);}    
     .expander iframe{border:0; width:100%; height:100%;}
     .expander-toolbar{position:absolute; top:.5rem; right:.5rem; display:flex; gap:.5rem; z-index:5;}
     .expander-toolbar a, .expander-toolbar button{background:var(--brand-orange); color:#fff; font-weight:600; padding:.45rem .7rem; border-radius:.75rem; font-size:.85rem;}
@@ -297,7 +297,7 @@
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
 
-        <!-- Card 1 — ACC Dashboards Overnight -->
+        <!-- Card 1 — ACC Dashboards Overnight (Looker Studio) -->
         <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
                  data-title="ACC Dashboards Overnight"
                  data-embed="https://lookerstudio.google.com/embed/reporting/1599824a-4993-4c4c-9932-c220be7565fe/page/qgR"
@@ -317,7 +317,7 @@
           </div>
         </article>
 
-        <!-- Card 2 — ACC Project Setup (1-Click) -->
+        <!-- Card 2 — ACC Project Setup (Streamlit) -->
         <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
                  data-title="ACC Project Setup (1-Click)"
                  data-embed="https://hmo-core-au2025.streamlit.app/?embed=true"
@@ -337,7 +337,7 @@
           </div>
         </article>
 
-        <!-- Card 3 — Parametric Budgeting -->
+        <!-- Card 3 — Parametric Budgeting (Streamlit) -->
         <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
                  data-title="Parametric Budgeting"
                  data-embed="https://hmo-core-parametric-budget.streamlit.app/?embed=true"
@@ -357,21 +357,24 @@
           </div>
         </article>
 
-        <!-- Card 4 — Generative Design (placeholder for now; set your URL when ready) -->
+        <!-- Card 4 — Generative Design: Industrial Park (Local demo) -->
         <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
-                 data-title="Generative Design (AEC)"
-                 data-embed="about:blank"
-                 role="button" tabindex="0" aria-label="Open Generative Design demo">
-          <div class="preview-wrap aspect-video bg-slate-100 grid place-items-center text-slate-500">
-            Generative Design
+                 data-title="Generative Design — Industrial Park"
+                 data-embed="./industrial-park-demo.html?embed=1"
+                 role="button" tabindex="0" aria-label="Open Industrial Park demo">
+          <div class="preview-wrap aspect-video bg-slate-100">
+            <iframe class="preview-iframe cardPreview"
+                    data-src="./industrial-park-demo.html?embed=1"
+                    title="Industrial Park Preview" loading="lazy"
+                    sandbox="allow-scripts allow-same-origin"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <div class="preview-hint hidden sm:block">Click to interact</div>
+            <div class="preview-blocked">Preview not available here. Click to open.</div>
           </div>
           <div class="p-4">
-            <h4 class="font-semibold">Generative Design (AEC)</h4>
-            <p class="text-sm text-slate-600">
-              Rapid optioneering: generate & score 100s of layout options by constraints (site, program, daylight, distance).
-              Export best fits to Revit/TestFit.
-            </p>
-            <a class="text-brand font-semibold text-sm" href="#" onclick="return false;">Open demo</a>
+            <h4 class="font-semibold">Generative Design — Industrial Park</h4>
+            <p class="text-sm text-slate-600">Pack buildings A/B/C, grid or spine streets, live KPIs.</p>
+            <a class="text-brand font-semibold text-sm" href="./industrial-park-demo.html" target="_blank" rel="noopener noreferrer">Open demo</a>
           </div>
         </article>
 
@@ -457,7 +460,7 @@
       setTimeout(() => document.getElementById('copiedMsg').classList.add('hidden'), 1500);
     });
 
-    // Theme switch
+    // Theme switch UI
     function updateSwitchUI(key){
       const h=document.getElementById('btnHmo');
       const b=document.getElementById('btnBimgen');
@@ -516,13 +519,28 @@
     }, { rootMargin: '200px' });
     previewIframes.forEach(ifr => io.observe(ifr));
 
+    // Prevent link clicks inside cards from also triggering the expander
+    document.querySelectorAll('#showcase article a').forEach(a => a.addEventListener('click', e => e.stopPropagation()));
+
+    // ---------- Helper to make toolbar URL nice ----------
+    function cleanOpenUrl(url) {
+      try {
+        const u = new URL(url, location.href);
+        u.searchParams.delete('embed');
+        if (u.hostname.includes('lookerstudio.google.com') && u.pathname.includes('/embed/')) {
+          u.pathname = u.pathname.replace('/embed/', '/reporting/');
+        }
+        return u.toString();
+      } catch { return url; }
+    }
+
     // ---------- FLIP grow animation from card to full view ----------
     function openFromCard(card) {
       const url   = card.getAttribute('data-embed');
       if (!url || url === 'about:blank') return;
 
       const rect  = card.getBoundingClientRect();
-      const start = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+      const start = { left: rect.left, top: rect.top + window.scrollY, width: rect.width, height: rect.height };
 
       // Backdrop
       const backdrop = document.createElement('div');
@@ -538,10 +556,13 @@
       // Toolbar + iframe (interactive)
       expander.innerHTML = `
         <div class="expander-toolbar">
-          <a href="${url.replace('/embed/', '/reporting/')}" target="_blank" rel="noopener noreferrer">Open in new tab</a>
+          <a href="${cleanOpenUrl(url)}" target="_blank" rel="noopener noreferrer">Open in new tab</a>
           <button type="button" id="expanderCloseBtn">Close</button>
         </div>
-        <iframe title="Interactive demo" src="${url}" allow="clipboard-read; clipboard-write; fullscreen; autoplay" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe title="Interactive demo" src="${url}"
+                allow="clipboard-read; clipboard-write; fullscreen; autoplay"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
       `;
       document.body.appendChild(expander);
 
@@ -556,7 +577,7 @@
         width:  Math.round(maxW),
         height: Math.round(maxH),
         left:   Math.round((window.innerWidth - maxW) / 2),
-        top:    Math.round((window.innerHeight - maxH) / 2)
+        top:    Math.round((window.innerHeight - maxH) / 2 + window.scrollY)
       };
 
       requestAnimationFrame(() => {
