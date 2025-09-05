@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Industrial Park — Generative Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--brand:#FF6A00}
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#fafbfc;color:#0f172a}
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid #e5e7eb;padding:.75rem 1rem;z-index:5}
+  h1{font-size:1rem;margin:0;font-weight:800;letter-spacing:.1px}
+  .controls{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem}
+  .control{background:#f8fafc;border:1px solid #e5e7eb;border-radius:.75rem;padding:.5rem .75rem;display:flex;align-items:center;gap:.5rem}
+  .control input[type=range]{width:160px}
+  .control input[type=number]{width:86px}
+  .pill{background:#fff;border:1px solid #e5e7eb;border-radius:1rem;padding:.25rem .5rem;font-size:.8rem}
+  main{max-width:1200px;margin:1rem auto;padding:0 1rem}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .col-8{grid-column:span 8}
+  .col-4{grid-column:span 4}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:1rem;box-shadow:0 8px 24px rgba(0,0,0,.06);overflow:hidden}
+  .thumb{position:relative;aspect-ratio:16/10;background:#eef2f7}
+  canvas{display:block;width:100%;height:100%}
+  .kp{padding:.75rem 1rem;border-top:1px solid #e5e7eb;font-size:.9rem;color:#475569;display:flex;flex-wrap:wrap;gap:.8rem}
+  .badge{background:#0000000d;border:1px solid #e5e7eb;border-radius:.75rem;padding:.25rem .55rem}
+  .row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .btype{display:flex;align-items:center;gap:.4rem}
+  .bchip{display:inline-flex;align-items:center;gap:.35rem;background:#fff;border:1px solid #e5e7eb;border-radius:999px;padding:.25rem .5rem;font-size:.8rem}
+  button.primary{background:var(--brand);color:#fff;border:0;border-radius:.75rem;padding:.55rem .9rem;font-weight:700;cursor:pointer}
+  button.secondary{background:#fff;border:1px solid #e5e7eb;border-radius:.75rem;padding:.55rem .9rem;font-weight:600;cursor:pointer}
+  .legend{display:flex;gap:.5rem;flex-wrap:wrap;font-size:.85rem;color:#475569;margin:.5rem 0}
+  .k{display:inline-block;width:12px;height:12px;border-radius:2px}
+  .k-site{background:#94a3b8}
+  .k-road{background:#0f172a}
+  .k-block{background:#cbd5e1}
+  .k-bldg{background:#0284c7}
+  @media(max-width:1000px){.col-8{grid-column:span 12}.col-4{grid-column:span 12}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Industrial Park — Generative Layout (Demo)</h1>
+  <div class="controls">
+    <div class="control"><label>Site W</label><input id="siteW" type="range" min="200" max="900" step="10" value="600"><span id="siteWv" class="pill">600 m</span></div>
+    <div class="control"><label>Site H</label><input id="siteH" type="range" min="200" max="700" step="10" value="400"><span id="siteHv" class="pill">400 m</span></div>
+    <div class="control"><label>Perimeter Setback</label><input id="setback" type="range" min="5" max="40" step="1" value="15"><span id="setbackv" class="pill">15 m</span></div>
+    <div class="control"><label>Road Width</label><input id="roadW" type="range" min="10" max="40" step="1" value="18"><span id="roadWv" class="pill">18 m</span></div>
+    <div class="control"><label>Street Spacing X</label><input id="spX" type="range" min="80" max="250" step="5" value="180"><span id="spXv" class="pill">180 m</span></div>
+    <div class="control"><label>Street Spacing Y</label><input id="spY" type="range" min="100" max="300" step="5" value="160"><span id="spYv" class="pill">160 m</span></div>
+    <div class="control"><label>Parcel Gap</label><input id="gap" type="range" min="6" max="30" step="1" value="12"><span id="gapv" class="pill">12 m</span></div>
+    <div class="control"><label><input id="spineMode" type="checkbox"> Spine mode</label></div>
+    <div class="control"><label><input id="allowRot" type="checkbox" checked> Allow rotation</label></div>
+    <button id="regen" class="primary">Generate</button>
+    <button id="export" class="secondary">Export JSON</button>
+  </div>
+  <div class="controls">
+    <div class="btype control">
+      <strong>A</strong>
+      <span class="bchip">W <input id="aW" type="number" value="120"> D <input id="aD" type="number" value="80"></span>
+      <span class="bchip">% <input id="aP" type="number" value="50"></span>
+    </div>
+    <div class="btype control">
+      <strong>B</strong>
+      <span class="bchip">W <input id="bW" type="number" value="90"> D <input id="bD" type="number" value="60"></span>
+      <span class="bchip">% <input id="bP" type="number" value="30"></span>
+    </div>
+    <div class="btype control">
+      <strong>C</strong>
+      <span class="bchip">W <input id="cW" type="number" value="60"> D <input id="cD" type="number" value="45"></span>
+      <span class="bchip">% <input id="cP" type="number" value="20"></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="legend">
+    <span><i class="k k-site"></i> site</span>
+    <span><i class="k k-road"></i> roads</span>
+    <span><i class="k k-block"></i> blocks/parcels</span>
+    <span><i class="k k-bldg"></i> buildings</span>
+  </div>
+
+  <div class="grid">
+    <section class="col-8">
+      <div class="card">
+        <div class="thumb"><canvas id="view"></canvas></div>
+        <div class="kp" id="kpis"></div>
+      </div>
+    </section>
+    <aside class="col-4">
+      <div class="card">
+        <div class="kp" id="mix"></div>
+        <div style="padding:1rem">
+          <p style="margin:.2rem 0 .8rem;color:#475569">Notes</p>
+          <ul style="margin:0 0 1rem 1rem;color:#64748b;line-height:1.4">
+            <li>Demo packs rectangular buildings into blocks created by a grid or spine road.</li>
+            <li>All parcels touch a road; buildings keep a yard gap between each other and edges.</li>
+            <li>“Allow rotation” tries width/depth swap to improve fit.</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+/* ===== Helpers ===== */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const $ = sel=>document.querySelector(sel);
+function valNum(id){ return parseFloat($(id).value); }
+['#siteW','#siteH','#setback','#roadW','#spX','#spY','#gap'].forEach(id=>{
+  $(id).addEventListener('input', ()=>{
+    $('#siteWv').textContent = `${valNum('#siteW')} m`;
+    $('#siteHv').textContent = `${valNum('#siteH')} m`;
+    $('#setbackv').textContent = `${valNum('#setback')} m`;
+    $('#roadWv').textContent = `${valNum('#roadW')} m`;
+    $('#spXv').textContent = `${valNum('#spX')} m`;
+    $('#spYv').textContent = `${valNum('#spY')} m`;
+    $('#gapv').textContent   = `${valNum('#gap')} m`;
+  });
+});
+function params(){
+  const mixP = [valNum('#aP'), valNum('#bP'), valNum('#cP')];
+  const sum = mixP.reduce((a,b)=>a+b,0) || 1;
+  const weights = mixP.map(p=>p/sum);
+  return {
+    siteW: valNum('#siteW'),
+    siteH: valNum('#siteH'),
+    setback: valNum('#setback'),
+    roadW: valNum('#roadW'),
+    spX: valNum('#spX'),
+    spY: valNum('#spY'),
+    gap: valNum('#gap'),
+    spine: $('#spineMode').checked,
+    allowRot: $('#allowRot').checked,
+    types: [
+      {key:'A', w:valNum('#aW'), d:valNum('#aD'), weight:weights[0]},
+      {key:'B', w:valNum('#bW'), d:valNum('#bD'), weight:weights[1]},
+      {key:'C', w:valNum('#cW'), d:valNum('#cD'), weight:weights[2]},
+    ]
+  };
+}
+
+/* ===== Geometry primitives ===== */
+function rect(x,y,w,h){ return {x,y,w,h}; }
+function inset(r, m){ return rect(r.x+m, r.y+m, Math.max(0,r.w-2*m), Math.max(0,r.h-2*m)); }
+function drawRect(ctx, r, fill, stroke, lw=1){
+  if(!r.w || !r.h) return;
+  if(fill){ ctx.fillStyle=fill; ctx.fillRect(r.x, r.y, r.w, r.h); }
+  if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=lw; ctx.strokeRect(r.x, r.y, r.w, r.h); }
+}
+
+/* ===== Road grid / spine ===== */
+function layoutRoads(site, p){
+  const roads = [];
+  if(p.spine){
+    // one main spine along site's long axis + cross streets every spY
+    const vertical = site.w >= site.h;
+    const rw = p.roadW;
+    if(vertical){
+      const cx = site.x + site.w/2;
+      roads.push(rect(cx - rw/2, site.y, rw, site.h)); // spine
+      for(let y = site.y + p.spY; y < site.y + site.h; y += p.spY){
+        roads.push(rect(site.x, y - rw/2, site.w, rw));
+      }
+    }else{
+      const cy = site.y + site.h/2;
+      roads.push(rect(site.x, cy - p.roadW/2, site.w, p.roadW));
+      for(let x = site.x + p.spX; x < site.x + site.w; x += p.spX){
+        roads.push(rect(x - p.roadW/2, site.y, p.roadW, site.h));
+      }
+    }
+  } else {
+    // orthogonal grid
+    for(let x = site.x + p.spX; x < site.x + site.w; x += p.spX){
+      roads.push(rect(x - p.roadW/2, site.y, p.roadW, site.h));
+    }
+    for(let y = site.y + p.spY; y < site.y + site.h; y += p.spY){
+      roads.push(rect(site.x, y - p.roadW/2, site.w, p.roadW));
+    }
+  }
+  return roads;
+}
+
+/* Build blocks from road grid: split site by each road */
+function carveBlocks(site, roads){
+  // start with one block: the site
+  let blocks = [site];
+  for(const rd of roads){
+    const next=[];
+    for(const b of blocks){
+      // if road intersects block, split it; else keep
+      if(!(rd.x+rd.w<=b.x || rd.x>=b.x+b.w || rd.y+rd.h<=b.y || rd.y>=b.y+b.h)){
+        // vertical road?
+        if(rd.h > rd.w){
+          const left = rect(b.x, b.y, rd.x - b.x, b.h);
+          const right= rect(rd.x + rd.w, b.y, (b.x+b.w)-(rd.x+rd.w), b.h);
+          if(left.w>2 && left.h>2) next.push(left);
+          if(right.w>2 && right.h>2) next.push(right);
+        } else {
+          const top = rect(b.x, b.y, b.w, rd.y - b.y);
+          const bot = rect(b.x, rd.y + rd.h, b.w, (b.y+b.h)-(rd.y+rd.h));
+          if(top.w>2 && top.h>2) next.push(top);
+          if(bot.w>2 && bot.h>2) next.push(bot);
+        }
+      } else {
+        next.push(b);
+      }
+    }
+    blocks = next;
+  }
+  return blocks;
+}
+
+/* ===== Packing buildings into a block ===== */
+function weightedPick(types){
+  const r = Math.random();
+  let acc=0;
+  for(const t of types){ acc += t.weight; if(r <= acc) return t; }
+  return types[types.length-1];
+}
+function tryPlace(block, x, y, t, gap, allowRot){
+  const opts = allowRot ? [[t.w,t.d],[t.d,t.w]] : [[t.w,t.d]];
+  for(const [w,d] of opts){
+    if(x + w + gap <= block.w && y + d + gap <= block.h){
+      return { ok:true, w, d };
+    }
+  }
+  return { ok:false };
+}
+function packBlock(blockRect, types, gap, allowRot){
+  const bl = inset(blockRect, gap); // inner area within parcel
+  const placed=[];
+  let y = 0;
+  while(y + Math.min(...types.map(t=>Math.min(t.w,t.d))) + gap <= bl.h){
+    let x = 0, rowH = 0, watchdog=0;
+    while(x + Math.min(...types.map(t=>Math.min(t.w,t.d))) + gap <= bl.w && watchdog<200){
+      watchdog++;
+      // pick a type (weighted), try to place; if fail, try others
+      const order=[...types].sort(()=>Math.random()-.5);
+      order.unshift(weightedPick(types)); // bias first try
+      let placedThis=false;
+      for(const tt of order){
+        const fit = tryPlace(bl, x, y, tt, gap, allowRot);
+        if(fit.ok){
+          placed.push({ x: bl.x + x, y: bl.y + y, w: fit.w, d: fit.d, key: tt.key, area: fit.w*fit.d });
+          x += fit.w + gap;
+          rowH = Math.max(rowH, fit.d);
+          placedThis=true;
+          break;
+        }
+      }
+      if(!placedThis){ // advance by small step to avoid stalling
+        x += 6;
+      }
+    }
+    if(rowH<=0) break;
+    y += rowH + gap;
+  }
+  return placed;
+}
+
+/* ===== Main generator ===== */
+function generate(){
+  const p = params();
+  const site = rect(0,0,p.siteW,p.siteH);
+  const buildArea = inset(site, p.setback);
+  const roads = layoutRoads(buildArea, p);
+  const blocks = carveBlocks(buildArea, roads).map(b=>inset(b, 2)); // trim to avoid overlaps
+
+  // Pack each block
+  const buildings=[]; const mixCount={A:0,B:0,C:0}; let gfa=0;
+  for(const b of blocks){
+    const placed = packBlock(b, p.types, p.gap, p.allowRot);
+    for(const x of placed){ buildings.push(x); mixCount[x.key]++; gfa += x.area; }
+  }
+
+  // KPIs
+  const siteArea = site.w*site.h;
+  const roadArea = roads.reduce((s,r)=>s+r.w*r.h,0);
+  const blockArea= blocks.reduce((s,r)=>s+r.w*r.h,0);
+  const cov = gfa / (siteArea - roadArea); // ground coverage over developable surface
+  const streetLen = roads.reduce((s,r)=>s + (r.w<r.h ? r.h : r.w),0);
+  return { params:p, site, buildArea, roads, blocks, buildings, mixCount, gfa, siteArea, roadArea, blockArea, cov, streetLen };
+}
+
+/* ===== Render ===== */
+const canvas = $('#view'); const ctx = canvas.getContext('2d');
+function fitCanvas(){
+  const w = canvas.clientWidth || canvas.parentElement.clientWidth;
+  const h = canvas.clientHeight || 0;
+  const ar = 16/10;
+  canvas.width = w*2; canvas.height = (w/ar)*2; // hi-dpi
+  canvas.style.height = (w/ar)+'px';
+}
+function drawModel(m){
+  fitCanvas();
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // scale to fit with padding
+  const pad = 40;
+  const sx = (W - 2*pad) / m.site.w;
+  const sy = (H - 2*pad) / m.site.h;
+  const s = Math.min(sx, sy);
+  const ox = pad + (W - 2*pad - m.site.w*s)/2;
+  const oy = pad + (H - 2*pad - m.site.h*s)/2;
+
+  ctx.save();
+  ctx.translate(ox, oy);
+
+  // site
+  ctx.fillStyle = '#94a3b84d';
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 3;
+  ctx.fillRect(0,0,m.site.w*s,m.site.h*s);
+  ctx.strokeRect(0,0,m.site.w*s,m.site.h*s);
+
+  // roads
+  ctx.fillStyle = '#0f172a';
+  m.roads.forEach(r=> ctx.fillRect(r.x*s, r.y*s, r.w*s, r.h*s));
+
+  // blocks
+  ctx.fillStyle = '#cbd5e1';
+  m.blocks.forEach(r=> ctx.fillRect(r.x*s, r.y*s, r.w*s, r.h*s));
+
+  // buildings
+  m.buildings.forEach(b=>{
+    ctx.fillStyle = '#0284c7';
+    ctx.strokeStyle = '#0369a1';
+    ctx.lineWidth = 2;
+    ctx.fillRect(b.x*s, b.y*s, b.w*s, b.d*s);
+    ctx.strokeRect(b.x*s, b.y*s, b.w*s, b.d*s);
+  });
+
+  ctx.restore();
+}
+
+/* ===== UI wiring ===== */
+function update(){
+  const model = generate();
+  drawModel(model);
+
+  // KPIs
+  const k = [
+    `Site: ${(model.siteArea/10000).toFixed(2)} ha`,
+    `Roads: ${(model.roadArea/10000).toFixed(2)} ha`,
+    `Blocks: ${(model.blockArea/10000).toFixed(2)} ha`,
+    `Buildings: ${model.buildings.length} pcs`,
+    `GFA: ${(model.gfa).toLocaleString()} m²`,
+    `Coverage: ${(model.cov*100).toFixed(1)}%`,
+    `Street length: ${model.streetLen.toFixed(0)} m`
+  ];
+  $('#kpis').innerHTML = k.map(x=>`<span class="badge">${x}</span>`).join(' ');
+  $('#mix').innerHTML = `
+    <div style="padding:.5rem 1rem">
+      <div class="row3">
+        <div class="bchip"><strong>A</strong> ${model.mixCount.A} × ${params().types[0].w}×${params().types[0].d}</div>
+        <div class="bchip"><strong>B</strong> ${model.mixCount.B} × ${params().types[1].w}×${params().types[1].d}</div>
+        <div class="bchip"><strong>C</strong> ${model.mixCount.C} × ${params().types[2].w}×${params().types[2].d}</div>
+      </div>
+    </div>`;
+
+  // Export
+  $('#export').onclick = ()=>{
+    const payload = JSON.stringify(model, null, 2);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([payload],{type:'application/json'}));
+    a.download = 'industrial_park_layout.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),500);
+  };
+}
+
+['#siteW','#siteH','#setback','#roadW','#spX','#spY','#gap','#spineMode','#allowRot',
+ '#aW','#aD','#aP','#bW','#bD','#bP','#cW','#cD','#cP'].forEach(id=>{
+  $(id).addEventListener('input', update);
+});
+$('#regen').addEventListener('click', update);
+
+window.addEventListener('resize', ()=>{ update(); });
+
+/* boot */
+['#siteW','#siteH','#setback','#roadW','#spX','#spY','#gap'].forEach(id=>{
+  $(id).dispatchEvent(new Event('input'));
+});
+setTimeout(update, 0);
+</script>
+</body>
+</html>
