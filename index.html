@@ -24,14 +24,14 @@
   </script>
 
   <!-- Icons + QR -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 
   <style>
     :root { --brand-orange:#FF6A00; --brand-navy:#2f3b52; --brand-gray:#F5F7FA; --mark-bg:var(--brand-orange); }
     body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 
-    /* Utility classes powered by CSS variables (runtime-themable) */
+    /* Brand utilities */
     .bg-brand { background-color: var(--brand-orange); }
     .text-brand { color: var(--brand-orange); }
     .border-brand { border-color: var(--brand-orange); }
@@ -42,22 +42,36 @@
     .brand-mark { background: var(--mark-bg); border-radius:.5rem; display:grid; place-items:center; overflow:hidden; }
     .brand-mark img { width:100%; height:100%; object-fit:contain; object-position:center; }
 
-    /* AU image (rounded, no badge) */
+    /* AU image */
     .au-logo img { height:28px; width:auto; display:block; border-radius:.5rem; }
     @media (min-width: 640px) { .au-logo img { height:32px; } }
 
-    /* Footer logos */
-    .logo-plain { height:24px; width:auto; display:block; object-fit:contain; object-position:center; }
-    @media (min-width: 640px) { .logo-plain { height:28px; } }
+    /* Footer logos & switches */
+    .footer-logo{height:28px;width:auto;display:block;object-fit:contain;object-position:center}
+    @media (min-width:640px){.footer-logo{height:32px}}
     .switch-btn{transition:all .15s ease;border-width:1px}
-    .switch-btn img{filter:grayscale(100%) brightness(.38)} /* neutral grey */
+    .switch-btn img{filter:grayscale(100%) brightness(.38)}
     #btnHmoImg{filter:grayscale(100%) brightness(.38)!important}
     .switch-btn.is-inactive img{opacity:.75}
     .switch-btn.is-active{border-color:var(--brand-orange);border-width:2px}
     .switch-btn:active{transform:scale(.98)}
     .switch-hint{user-select:none}
-    .footer-logo{height:28px;width:auto;display:block}
-    @media (min-width:640px){.footer-logo{height:32px}}
+
+    /* ---- Live preview inside cards ---- */
+    .preview-wrap{position:relative; overflow:hidden; border-top-left-radius:1rem; border-top-right-radius:1rem;}
+    .preview-iframe{position:absolute; inset:0; width:100%; height:100%; border:0; pointer-events:none;}
+    .preview-hint{position:absolute; bottom:.5rem; right:.5rem; background:rgba(255,255,255,.9); font-size:.75rem; padding:.25rem .5rem; border-radius:.5rem;}
+    .preview-blocked{position:absolute; inset:0; display:none; place-items:center; text-align:center; background:rgba(248,250,252,.9); color:#334155; padding:1rem;}
+    .preview-wrap.is-blocked .preview-blocked{display:grid;}
+
+    /* ---- FLIP Expander ---- */
+    .expander-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; transition:opacity .25s ease; z-index:100;}
+    .expander-backdrop.is-visible{opacity:1;}
+    .expander{position:fixed; z-index:110; overflow:hidden; background:#fff; border-radius:1rem; box-shadow:0 10px 30px rgba(0,0,0,.12);}
+    .expander.is-animating{transition: left .38s cubic-bezier(.2,.8,.2,1), top .38s cubic-bezier(.2,.8,.2,1), width .38s cubic-bezier(.2,.8,.2,1), height .38s cubic-bezier(.2,.8,.2,1), border-radius .38s cubic-bezier(.2,.8,.2,1);}
+    .expander iframe{border:0; width:100%; height:100%;}
+    .expander-toolbar{position:absolute; top:.5rem; right:.5rem; display:flex; gap:.5rem; z-index:5;}
+    .expander-toolbar a, .expander-toolbar button{background:var(--brand-orange); color:#fff; font-weight:600; padding:.45rem .7rem; border-radius:.75rem; font-size:.85rem;}
   </style>
 </head>
 <body class="bg-white text-slate-800">
@@ -130,7 +144,7 @@
       currentThemeKey = key;
       localStorage.setItem('brand', key);
 
-      // Colors as CSS variables (for runtime swap)
+      // Colors
       setVar('--brand-orange', t.colors.orange);
       setVar('--brand-navy', t.colors.navy);
       setVar('--brand-gray', t.colors.gray);
@@ -143,15 +157,15 @@
       // Logos
       $('#logoSmall').src = t.logos.mark;
       $('#logoHero').src  = t.logos.mark;
-      $('#auLogo').src    = 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/upscalemedia-transformed.png';
+      const au = $('#auLogo'); if (au) au.src = 'https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/upscalemedia-transformed.png';
 
-      // Footer + partner swap
+      // Footer + partner
       $('#logoFooterMain').src = t.logos.footer || t.logos.wordmark || t.logos.mark;
       $('#logoFooterMainLink').href = t.site.url;
       $('#partnerLogo').src = t.partner.logo;
       $('#partnerLogoLink').href = t.partner.url;
 
-      // Contact (hero + contact section)
+      // Contact
       $('#nameText').textContent = t.contact.name;
       $('#titlesText').textContent = t.contact.titles;
       $('#orgLine').textContent = t.heroOrgLine;
@@ -163,20 +177,17 @@
       $('#phoneLink').textContent = formatPhone(t.contact.phone);
       $('#siteLink').href = t.site.url; $('#siteLink').textContent = t.site.label;
 
-      // Update URL param for sharing
+      // Share URL
       const url = new URL(location.href);
       url.searchParams.set('brand', key);
       history.replaceState({}, '', url);
-
       const shareUrl = url.toString();
       $('#shareUrl').value = shareUrl;
       $('#linkCode').textContent = shareUrl;
-      if (window.__qrInstance) { window.__qrInstance.set({ value: shareUrl }); }
+      if (window.__qrInstance) window.__qrInstance.set({ value: shareUrl });
 
-      // Update switch UI
       if (typeof updateSwitchUI === 'function') updateSwitchUI(key);
     }
-
     function formatPhone(p) { return p.replace(/^\+52(\d{3})(\d{3})(\d{4})$/, '+52 ($1) $2 $3'); }
   </script>
 
@@ -184,10 +195,7 @@
   <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3 min-w-0">
-        <!-- Brand mark (square in theme color) -->
-        <div class="w-7 h-7 brand-mark">
-          <img id="logoSmall" alt="Brand mark" />
-        </div>
+        <div class="w-7 h-7 brand-mark"><img id="logoSmall" alt="Brand mark" /></div>
         <div class="truncate">
           <span id="brandName" class="font-extrabold tracking-tight"></span>
           <span class="text-slate-400">•</span>
@@ -201,41 +209,34 @@
         <a href="#contact" class="hover:text-brand">Contact</a>
       </nav>
 
-      <!-- Switch buttons + AU logo -->
       <div class="flex items-center gap-3">
         <div class="flex flex-col items-end gap-1">
           <span class="switch-hint text-[11px] text-slate-500 hidden sm:inline">Tap a logo to switch</span>
           <div id="brandSwitch" class="flex items-center gap-2">
             <button id="btnHmo" class="switch-btn is-inactive inline-flex items-center gap-2 rounded-xl border border-slate-300 px-2 py-1 bg-white" type="button" aria-pressed="false" title="Switch to Hermosillo">
-              <img id="btnHmoImg" class="h-6 w-auto" alt="Hermosillo logo"/>
-              <span class="text-xs font-semibold hidden sm:inline">Hermosillo</span>
+              <img id="btnHmoImg" class="h-6 w-auto" alt="Hermosillo logo"/><span class="text-xs font-semibold hidden sm:inline">Hermosillo</span>
             </button>
             <button id="btnBimgen" class="switch-btn is-inactive inline-flex items-center gap-2 rounded-xl border border-slate-300 px-2 py-1 bg-white" type="button" aria-pressed="false" title="Switch to BIM GEN">
-              <img id="btnBimgenImg" class="h-6 w-auto" alt="BIM GEN logo"/>
-              <span class="text-xs font-semibold hidden sm:inline">BIM • GEN</span>
+              <img id="btnBimgenImg" class="h-6 w-auto" alt="BIM GEN logo"/><span class="text-xs font-semibold hidden sm:inline">BIM • GEN</span>
             </button>
           </div>
         </div>
         <div class="hidden sm:flex items-center gap-2 au-logo">
-          <span class="text-xs text-slate-500">AU 2025 Speaker</span>
-          <img id="auLogo" alt="Autodesk University" />
+          <span class="text-xs text-slate-500">AU 2024 - 2025 Speaker</span>
+          <img id="auLogo" loading="lazy" alt="Autodesk University" />
         </div>
       </div>
     </div>
   </header>
 
-  <!-- HERO / DIGITAL CARD -->
+  <!-- HERO -->
   <section class="relative">
     <div class="max-w-6xl mx-auto px-4 py-12 grid lg:grid-cols-2 gap-10 items-center">
-      <!-- Left: Card visual -->
       <div>
         <div class="bg-brand-navy text-white rounded-2xl p-6 shadow-soft relative overflow-hidden">
           <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/5"></div>
           <div class="flex items-center gap-4">
-            <!-- Big brand mark in square -->
-            <div class="w-12 h-12 brand-mark">
-              <img id="logoHero" alt="Brand" />
-            </div>
+            <div class="w-12 h-12 brand-mark"><img id="logoHero" alt="Brand" /></div>
             <div class="min-w-0">
               <p id="orgLine" class="text-sm text-slate-300"></p>
               <p id="taglineHero" class="text-xs text-brand font-semibold"></p>
@@ -255,14 +256,14 @@
 
           <div class="mt-6 flex flex-wrap gap-3">
             <button id="saveVcf" class="px-4 py-2 rounded-xl bg-white text-slate-900 font-semibold hover:opacity-90">Save Contact (.vcf)</button>
-            <a href="https://www.linkedin.com/in/josuebalderrama/" target="_blank" class="px-4 py-2 rounded-xl border border-white/30 hover:bg-white/10">LinkedIn</a>
+            <a href="https://www.linkedin.com/in/josuebalderrama/" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl border border-white/30 hover:bg-white/10">LinkedIn</a>
             <a href="#showcase" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold hover:opacity-90">See Demos</a>
           </div>
         </div>
 
         <p class="text-xs text-slate-500 mt-3">Scan the QR or tap an NFC card to open this page anywhere.</p>
         <div class="mt-4 flex items-center gap-4">
-          <canvas id="qr" class="rounded-2xl border border-slate-200"></canvas>
+          <canvas id="qr" class="rounded-2xl border border-slate-200" aria-label="QR code for this card’s URL"></canvas>
           <div>
             <p class="text-sm text-slate-600">Link:</p>
             <code id="linkCode" class="text-xs bg-slate-100 px-2 py-1 rounded">(auto)</code>
@@ -270,7 +271,6 @@
         </div>
       </div>
 
-      <!-- Right: Why this is different -->
       <div>
         <h2 class="text-2xl font-extrabold tracking-tight">A business card that actually does things.</h2>
         <p class="mt-3 text-slate-600">
@@ -292,61 +292,101 @@
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex items-baseline justify-between">
         <h3 class="text-xl font-bold">Showcase — Innovation in Action</h3>
-        <a href="https://conferences.autodesk.com/flow/autodesk/au2025/sessioncatalog/page/inperson/session/1744090156490001WazM" target="_blank" class="text-brand text-sm font-semibold">AU 2025 →</a>
+        <a href="https://conferences.autodesk.com/flow/autodesk/au2025/sessioncatalog/page/inperson/session/1744090156490001WazM" target="_blank" rel="noopener noreferrer" class="text-brand text-sm font-semibold">AU 2025 Session →</a>
       </div>
-      <!-- Changed grid to 4 cols on XL -->
+
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
-        <!-- Card 1 -->
-        <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
-          <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">Dashboard Preview</div>
+
+        <!-- Card 1 — ACC Dashboards Overnight -->
+        <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
+                 data-title="ACC Dashboards Overnight"
+                 data-embed="https://lookerstudio.google.com/embed/reporting/1599824a-4993-4c4c-9932-c220be7565fe/page/qgR"
+                 role="button" tabindex="0" aria-label="Open ACC Dashboards Overnight demo">
+          <div class="preview-wrap aspect-video bg-slate-100">
+            <iframe class="preview-iframe cardPreview"
+                    data-src="https://lookerstudio.google.com/embed/reporting/1599824a-4993-4c4c-9932-c220be7565fe/page/qgR"
+                    title="ACC Dashboards Preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            <div class="preview-hint hidden sm:block">Click to interact</div>
+            <div class="preview-blocked">Preview not available here. Click to open.</div>
+          </div>
           <div class="p-4">
             <h4 class="font-semibold">ACC Dashboards Overnight</h4>
             <p class="text-sm text-slate-600">Automated data pipelines from ACC to live dashboards. Nightly refresh, zero manual work.</p>
-            <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
+            <a class="text-brand font-semibold text-sm" href="https://lookerstudio.google.com/reporting/1599824a-4993-4c4c-9932-c220be7565fe/page/qgR" target="_blank" rel="noopener noreferrer">Open demo</a>
           </div>
         </article>
-        <!-- Card 2 -->
-        <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
-          <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">One-Click Project Setup</div>
+
+        <!-- Card 2 — ACC Project Setup (1-Click) -->
+        <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
+                 data-title="ACC Project Setup (1-Click)"
+                 data-embed="https://hmo-core-au2025.streamlit.app/?embed=true"
+                 role="button" tabindex="0" aria-label="Open ACC Project Setup demo">
+          <div class="preview-wrap aspect-video bg-slate-100">
+            <iframe class="preview-iframe cardPreview"
+                    data-src="https://hmo-core-au2025.streamlit.app/?embed=true"
+                    title="ACC Setup Preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            <div class="preview-hint hidden sm:block">Click to interact</div>
+            <div class="preview-blocked">Preview not available here. Click to open.</div>
+          </div>
           <div class="p-4">
             <h4 class="font-semibold">ACC Project Setup (1-Click)</h4>
             <p class="text-sm text-slate-600">Templates configure permissions, folders, issues, reviews, and Build sheets automatically.</p>
-            <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
+            <a class="text-brand font-semibold text-sm" href="https://hmo-core-au2025.streamlit.app/" target="_blank" rel="noopener noreferrer">Open demo</a>
           </div>
         </article>
-        <!-- Card 3 -->
-        <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
-          <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">Parametric Budgeting</div>
+
+        <!-- Card 3 — Parametric Budgeting -->
+        <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
+                 data-title="Parametric Budgeting"
+                 data-embed="https://hmo-core-parametric-budget.streamlit.app/?embed=true"
+                 role="button" tabindex="0" aria-label="Open Parametric Budgeting demo">
+          <div class="preview-wrap aspect-video bg-slate-100">
+            <iframe class="preview-iframe cardPreview"
+                    data-src="https://hmo-core-parametric-budget.streamlit.app/?embed=true"
+                    title="Parametric Budgeting Preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            <div class="preview-hint hidden sm:block">Click to interact</div>
+            <div class="preview-blocked">Preview not available here. Click to open.</div>
+          </div>
           <div class="p-4">
             <h4 class="font-semibold">Parametric Budgeting</h4>
             <p class="text-sm text-slate-600">Phone-style UI with live 3D preview and cost breakdown. Built for rapid scenario testing.</p>
-            <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
+            <a class="text-brand font-semibold text-sm" href="https://hmo-core-parametric-budget.streamlit.app/" target="_blank" rel="noopener noreferrer">Open demo</a>
           </div>
         </article>
-        <!-- Card 4 -->
-        <article class="rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden">
-          <div class="aspect-video bg-slate-200 grid place-items-center text-slate-500">Generative Design</div>
+
+        <!-- Card 4 — Generative Design (placeholder for now; set your URL when ready) -->
+        <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
+                 data-title="Generative Design (AEC)"
+                 data-embed="about:blank"
+                 role="button" tabindex="0" aria-label="Open Generative Design demo">
+          <div class="preview-wrap aspect-video bg-slate-100 grid place-items-center text-slate-500">
+            Generative Design
+          </div>
           <div class="p-4">
             <h4 class="font-semibold">Generative Design (AEC)</h4>
             <p class="text-sm text-slate-600">
               Rapid optioneering: generate & score 100s of layout options by constraints (site, program, daylight, distance).
               Export best fits to Revit/TestFit.
             </p>
-            <a class="text-brand font-semibold text-sm" href="#" target="_blank">Open demo</a>
+            <a class="text-brand font-semibold text-sm" href="#" onclick="return false;">Open demo</a>
           </div>
         </article>
+
       </div>
     </div>
   </section>
 
-  <!-- AR SPOT -->
+  <!-- AR -->
   <section id="ar" class="py-12">
     <div class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-center">
       <div>
         <h3 class="text-xl font-bold">AR Spot — See it in your space</h3>
         <p class="mt-2 text-slate-600">Scan the QR to launch a WebAR demo (e.g., tilt-up panel or an interactive asset dashboard). Swap the link below with your 8thWall/A-Frame/Three.js scene.</p>
         <div class="mt-4 flex gap-3">
-          <a id="arLink" href="https://example.com/webar-demo" target="_blank" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR Demo</a>
+          <a id="arLink" href="https://example.com/webar-demo" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR Demo</a>
           <a href="#" class="px-4 py-2 rounded-xl border border-slate-300">How it works</a>
         </div>
       </div>
@@ -366,8 +406,8 @@
         <div class="mt-6 grid gap-2 text-sm">
           <div class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> <a id="mailLink2" class="hover:underline" href="#">email</a></div>
           <div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> <a id="phoneLink2" class="hover:underline" href="#">phone</a></div>
-          <div class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4"></i> <a id="siteLink" class="hover:underline" href="#" target="_blank">site</a></div>
-          <div class="flex items-center gap-2"><i data-lucide="linkedin" class="w-4 h-4"></i> <a class="hover:underline" href="https://www.linkedin.com/in/josuebalderrama/" target="_blank">LinkedIn</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4"></i> <a id="siteLink" class="hover:underline" href="#" target="_blank" rel="noopener noreferrer">site</a></div>
+          <div class="flex items-center gap-2"><i data-lucide="linkedin" class="w-4 h-4"></i> <a class="hover:underline" href="https://www.linkedin.com/in/josuebalderrama/" target="_blank" rel="noopener noreferrer">LinkedIn</a></div>
         </div>
       </div>
       <div class="bg-white text-slate-800 rounded-2xl p-6 shadow-soft">
@@ -386,14 +426,12 @@
   <footer class="py-8 text-center text-sm text-slate-500">
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex items-center justify-center gap-3">
-        <!-- Main brand wordmark (clickable) -->
         <a id="logoFooterMainLink" href="#" target="_blank" rel="noopener">
-          <img id="logoFooterMain" class="footer-logo object-contain" alt="Main brand" />
+          <img id="logoFooterMain" class="footer-logo object-contain" loading="lazy" alt="Main brand" />
         </a>
         <span>•</span>
-        <!-- Partner logo (clickable) -->
         <a id="partnerLogoLink" href="#" target="_blank" rel="noopener">
-          <img id="partnerLogo" class="footer-logo object-contain" alt="Partner logo" />
+          <img id="partnerLogo" class="footer-logo object-contain" loading="lazy" alt="Partner logo" />
         </a>
       </div>
       <p class="mt-2">© <span id="year"></span> Josue Balderrama — Core Innovation Lead</p>
@@ -404,7 +442,7 @@
     // Icons
     lucide.createIcons();
 
-    // QR init
+    // QR
     const qrElem = document.getElementById('qr');
     window.__qrInstance = new QRious({ element: qrElem, value: location.href, size: 120, level: 'M' });
 
@@ -419,63 +457,144 @@
       setTimeout(() => document.getElementById('copiedMsg').classList.add('hidden'), 1500);
     });
 
-    // Brand switch buttons + UI state
+    // Theme switch
     function updateSwitchUI(key){
       const h=document.getElementById('btnHmo');
       const b=document.getElementById('btnBimgen');
       [h,b].forEach(btn=>{btn.classList.remove('is-active');btn.classList.add('is-inactive');btn.setAttribute('aria-pressed','false');});
       const active = key==='bimgen'? b : h;
-      active.classList.add('is-active');
-      active.classList.remove('is-inactive');
-      active.setAttribute('aria-pressed','true');
+      active.classList.add('is-active'); active.classList.remove('is-inactive'); active.setAttribute('aria-pressed','true');
     }
-    // Set button logos
-    try{
-      document.getElementById('btnHmoImg').src = THEMES.hmo.logos.mark;
-      document.getElementById('btnBimgenImg').src = THEMES.bimgen.logos.mark;
-    }catch{}
-    // Click handlers
-    const btnHmo = document.getElementById('btnHmo');
-    const btnBimgen = document.getElementById('btnBimgen');
+    try{ document.getElementById('btnHmoImg').src = THEMES.hmo.logos.mark; document.getElementById('btnBimgenImg').src = THEMES.bimgen.logos.mark; }catch{}
+    const btnHmo = document.getElementById('btnHmo'); const btnBimgen = document.getElementById('btnBimgen');
     if(btnHmo) btnHmo.addEventListener('click', ()=>applyTheme('hmo'));
     if(btnBimgen) btnBimgen.addEventListener('click', ()=>applyTheme('bimgen'));
 
-    // Save VCF (vCard) dynamically using active theme
+    // vCard (CRLF newlines)
     function buildVCard(t) {
-      const a = t.contact.address;
-      return `BEGIN:VCARD\nVERSION:3.0\nN:${t.contact.name.split(' ').slice(-1)[0]};${t.contact.name.split(' ').slice(0,-1).join(' ')};;;\nFN:${t.contact.name}\nORG:${t.contact.org}\nTITLE:${t.contact.titles}\nEMAIL;TYPE=INTERNET:${t.contact.email}\nTEL;TYPE=CELL:${t.contact.phone}\nADR;TYPE=WORK:;;${a.street};${a.city};${a.region};${a.postal};${a.country}\nURL:${location.href}\nEND:VCARD`;
+      const a = t.contact.address; const nl = '\r\n';
+      const parts = t.contact.name.trim().split(' '); const last = parts.pop(); const first = parts.join(' ');
+      return [
+        'BEGIN:VCARD','VERSION:3.0',`N:${last};${first};;;`,`FN:${t.contact.name}`,`ORG:${t.contact.org}`,
+        `TITLE:${t.contact.titles}`,`EMAIL;TYPE=INTERNET:${t.contact.email}`,`TEL;TYPE=CELL:${t.contact.phone}`,
+        `ADR;TYPE=WORK:;;${a.street};${a.city};${a.region};${a.postal};${a.country}`,`URL:${location.href}`,'END:VCARD'
+      ].join(nl);
     }
-
     document.getElementById('saveVcf').addEventListener('click', () => {
-      const t = THEMES[currentThemeKey];
-      const vcf = buildVCard(t);
+      const t = THEMES[currentThemeKey]; const vcf = buildVCard(t);
       const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `Contact-${t.contact.org.replace(/\s+/g,'')}.vcf`;
-      a.click();
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `Contact-${t.contact.org.replace(/\s+/g,'')}.vcf`; a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     });
 
-    // Boot
-    applyTheme(currentThemeKey);
-    try{ updateSwitchUI(currentThemeKey); }catch{}
-
-    // Footer year
+    // Boot theme + footer year + contact mirror
+    applyTheme(currentThemeKey); try{ updateSwitchUI(currentThemeKey); }catch{}
     document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Mirror mail/phone to contact section
-    const syncContacts = () => {
-      const t = THEMES[currentThemeKey];
-      document.getElementById('mailLink2').href = `mailto:${t.contact.email}`;
-      document.getElementById('mailLink2').textContent = t.contact.email;
-      document.getElementById('phoneLink2').href = `tel:${t.contact.phone}`;
-      document.getElementById('phoneLink2').textContent = (t.contact.phone);
+    const syncContacts = () => { const t = THEMES[currentThemeKey];
+      document.getElementById('mailLink2').href = `mailto:${t.contact.email}`; document.getElementById('mailLink2').textContent = t.contact.email;
+      document.getElementById('phoneLink2').href = `tel:${t.contact.phone}`; document.getElementById('phoneLink2').textContent = (t.contact.phone);
     };
-    syncContacts();
-    // Re-sync on theme change
-    const _applyThemeOrig = applyTheme;
-    applyTheme = function(key){ _applyThemeOrig(key); syncContacts(); };
+    syncContacts(); const _applyThemeOrig = applyTheme; applyTheme = function(key){ _applyThemeOrig(key); syncContacts(); };
+
+    // ---------- Lazy-load live previews inside cards ----------
+    const previewIframes = document.querySelectorAll('.cardPreview');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const ifr = e.target;
+          if (!ifr.src && ifr.dataset.src) {
+            ifr.src = ifr.dataset.src;
+            const wrap = ifr.closest('.preview-wrap');
+            // Fallback if provider blocks embedding (simple timeout heuristic)
+            const timer = setTimeout(() => { wrap && wrap.classList.add('is-blocked'); }, 3000);
+            ifr.addEventListener('load', () => { clearTimeout(timer); /* success */ }, { once:true });
+          }
+          io.unobserve(ifr);
+        }
+      });
+    }, { rootMargin: '200px' });
+    previewIframes.forEach(ifr => io.observe(ifr));
+
+    // ---------- FLIP grow animation from card to full view ----------
+    function openFromCard(card) {
+      const url   = card.getAttribute('data-embed');
+      if (!url || url === 'about:blank') return;
+
+      const rect  = card.getBoundingClientRect();
+      const start = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+
+      // Backdrop
+      const backdrop = document.createElement('div');
+      backdrop.className = 'expander-backdrop';
+      document.body.appendChild(backdrop);
+      requestAnimationFrame(()=>backdrop.classList.add('is-visible'));
+
+      // Expander panel (starts at card bounds)
+      const expander = document.createElement('div');
+      expander.className = 'expander is-animating';
+      Object.assign(expander.style, { left: `${start.left}px`, top: `${start.top}px`, width: `${start.width}px`, height: `${start.height}px`, borderRadius: '1rem' });
+
+      // Toolbar + iframe (interactive)
+      expander.innerHTML = `
+        <div class="expander-toolbar">
+          <a href="${url.replace('/embed/', '/reporting/')}" target="_blank" rel="noopener noreferrer">Open in new tab</a>
+          <button type="button" id="expanderCloseBtn">Close</button>
+        </div>
+        <iframe title="Interactive demo" src="${url}" allow="clipboard-read; clipboard-write; fullscreen; autoplay" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      `;
+      document.body.appendChild(expander);
+
+      // Lock scroll
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      // Target geometry (centered, responsive)
+      const maxW = Math.min(window.innerWidth * 0.92, 1152);   // ≈ max-w-6xl
+      const maxH = Math.round(window.innerHeight * 0.82);
+      const target = {
+        width:  Math.round(maxW),
+        height: Math.round(maxH),
+        left:   Math.round((window.innerWidth - maxW) / 2),
+        top:    Math.round((window.innerHeight - maxH) / 2)
+      };
+
+      requestAnimationFrame(() => {
+        Object.assign(expander.style, {
+          left: `${target.left}px`, top: `${target.top}px`,
+          width: `${target.width}px`, height: `${target.height}px`,
+          borderRadius: '1rem'
+        });
+      });
+
+      const close = () => {
+        // Animate back to card
+        Object.assign(expander.style, {
+          left: `${start.left}px`, top: `${start.top}px`,
+          width: `${start.width}px`, height: `${start.height}px`, borderRadius: '1rem'
+        });
+        backdrop.classList.remove('is-visible');
+
+        const cleanup = () => {
+          expander.remove(); backdrop.remove();
+          document.body.style.overflow = prevOverflow;
+          window.removeEventListener('keydown', onEsc);
+        };
+        expander.addEventListener('transitionend', cleanup, { once:true });
+      };
+
+      const onEsc = (e)=>{ if (e.key === 'Escape') close(); };
+      window.addEventListener('keydown', onEsc);
+      expander.querySelector('#expanderCloseBtn').addEventListener('click', close);
+      backdrop.addEventListener('click', close);
+    }
+
+    // Card listeners (click + keyboard)
+    document.querySelectorAll('#showcase article[data-embed]').forEach(card => {
+      const open = () => openFromCard(card);
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    });
   </script>
 </body>
 </html>
