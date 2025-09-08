@@ -183,7 +183,7 @@
       history.replaceState({}, '', url);
       const shareUrl = url.toString();
       $('#shareUrl').value = shareUrl;
-      $('#linkCode').textContent = shareUrl;
+      const linkCodeEl = $('#linkCode'); if (linkCodeEl) linkCodeEl.textContent = shareUrl;
       if (window.__qrInstance) window.__qrInstance.set({ value: shareUrl });
 
       if (typeof updateSwitchUI === 'function') updateSwitchUI(key);
@@ -389,12 +389,34 @@
         <h3 class="text-xl font-bold">AR Spot — See it in your space</h3>
         <p class="mt-2 text-slate-600">Scan the QR to launch a WebAR demo (e.g., tilt-up panel or an interactive asset dashboard). Swap the link below with your 8thWall/A-Frame/Three.js scene.</p>
         <div class="mt-4 flex gap-3">
-          <a id="arLink" href="https://example.com/webar-demo" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR Demo</a>
+          <a id="arLink" href="//cdn.8thwall.com/web/share/embed8.js" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR Demo</a>
           <a href="#" class="px-4 py-2 rounded-xl border border-slate-300">How it works</a>
         </div>
       </div>
+
+      <!-- >>> Replaced Placeholder with AR iframe + fallback <<< -->
       <div class="rounded-2xl border border-slate-200 p-6">
-        <div class="aspect-video bg-slate-100 grid place-items-center text-slate-500 rounded-xl">AR Placeholder / Poster</div>
+        <div class="relative aspect-video rounded-xl overflow-hidden bg-black">
+          <iframe id="arFrame"
+                  title="AR Demo"
+                  class="absolute inset-0 w-full h-full"
+                  src="about:blank"
+                  allow="camera; microphone; gyroscope; accelerometer; magnetometer; xr-spatial-tracking; fullscreen; autoplay; clipboard-write; geolocation; web-share"
+                  allowfullscreen
+                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+          <div id="arFallback" class="absolute inset-0 hidden grid place-items-center bg-slate-900/80 text-white">
+            <div class="text-center px-6">
+              <p class="font-semibold">If the AR view doesn’t appear here, open it full screen:</p>
+              <a id="arFallbackLink"
+                 class="mt-3 inline-block px-4 py-2 rounded-xl bg-brand text-white font-semibold"
+                 href="#"
+                 target="_blank"
+                 rel="noopener">Open AR demo</a>
+              <p class="mt-2 text-xs text-white/70">Some mobile browsers require AR to run outside an iframe.</p>
+            </div>
+          </div>
+        </div>
         <p class="text-xs text-slate-500 mt-3">Tip: include a simple marker/target image here for fallback tracking.</p>
       </div>
     </div>
@@ -451,7 +473,7 @@
 
     // Share URL init
     document.getElementById('shareUrl').value = location.href;
-    document.getElementById('linkCode').textContent = location.href;
+    const linkCodeEl = document.getElementById('linkCode'); if (linkCodeEl) linkCodeEl.textContent = location.href;
 
     // Copy link
     document.getElementById('copyBtn').addEventListener('click', async () => {
@@ -616,6 +638,40 @@
       card.addEventListener('click', open);
       card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     });
+
+    // ---------- AR Embed wiring ----------
+    (function initAR(){
+      // Set your AR app here (8th Wall / A-Frame / custom). One place to change.
+      const DEFAULT_AR_URL = "//cdn.8thwall.com/web/share/embed8.js"; // <-- Replace with your real AR URL
+      const arLinkBtn = document.getElementById('arLink');
+      const arFrame = document.getElementById('arFrame');
+      const arFallback = document.getElementById('arFallback');
+      const arFallbackLink = document.getElementById('arFallbackLink');
+
+      const AR_URL = (arLinkBtn && arLinkBtn.getAttribute('href')) || DEFAULT_AR_URL;
+
+      // Keep link and fallback in sync
+      if (arLinkBtn) arLinkBtn.href = AR_URL;
+      if (arFallbackLink) arFallbackLink.href = AR_URL;
+
+      // Try to load embeddable version (append ?embed=1)
+      const embedUrl = AR_URL + (AR_URL.includes('?') ? '&' : '?') + 'embed=1';
+      if (arFrame) {
+        let loaded = false;
+        arFrame.addEventListener('load', () => { loaded = true; }, { once: true });
+        arFrame.src = embedUrl;
+
+        // If no load event within 3.5s, assume provider blocks iframes → show fallback
+        setTimeout(() => {
+          if (!loaded && arFallback) arFallback.classList.remove('hidden');
+        }, 3500);
+      }
+
+      // Optional: listen for a READY postMessage from your AR app to instantly hide fallback
+      // window.addEventListener('message', (e) => {
+      //   if (e.data === 'AR_READY' && arFallback) arFallback.classList.add('hidden');
+      // });
+    })();
   </script>
 </body>
 </html>
