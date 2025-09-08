@@ -72,6 +72,11 @@
     .expander iframe{border:0; width:100%; height:100%;}
     .expander-toolbar{position:absolute; top:.5rem; right:.5rem; display:flex; gap:.5rem; z-index:5;}
     .expander-toolbar a, .expander-toolbar button{background:var(--brand-orange); color:#fff; font-weight:600; padding:.45rem .7rem; border-radius:.75rem; font-size:.85rem;}
+
+    /* ---- Modal (How it works) ---- */
+    .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; z-index:120;}
+    .modal-backdrop.is-open{display:block;}
+    .modal-panel{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:130;}
   </style>
 </head>
 <body class="bg-white text-slate-800">
@@ -387,18 +392,28 @@
     <div class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-center">
       <div>
         <h3 class="text-xl font-bold">AR Spot — See it in your space</h3>
-        <p class="mt-2 text-slate-600">Scan the QR to launch a WebAR demo (e.g., tilt-up panel or an interactive asset dashboard). Swap the link below with your 8thWall/A-Frame/Three.js scene.</p>
+        <p class="mt-2 text-slate-600">
+          Launch the WebAR experience. When prompted, allow camera and motion permissions. For tracking, point your phone at
+          your <span class="font-semibold">physical presentation card</span>.
+        </p>
         <div class="mt-4 flex gap-3">
-          <a id="arLink" href="//cdn.8thwall.com/web/share/embed8.js" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR Demo</a>
-          <a href="#" class="px-4 py-2 rounded-xl border border-slate-300">How it works</a>
+          <!-- Launch AR App button goes directly to ARAPP.html -->
+          <a id="arLink"
+             href="./ARAPP.html"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR App</a>
+
+          <!-- How it works opens modal -->
+          <button id="howBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300">How it works</button>
         </div>
       </div>
 
-      <!-- >>> Replaced Placeholder with AR iframe + fallback <<< -->
+      <!-- AR iframe + fallback -->
       <div class="rounded-2xl border border-slate-200 p-6">
         <div class="relative aspect-video rounded-xl overflow-hidden bg-black">
           <iframe id="arFrame"
-                  title="AR Demo"
+                  title="AR Experience"
                   class="absolute inset-0 w-full h-full"
                   src="about:blank"
                   allow="camera; microphone; gyroscope; accelerometer; magnetometer; xr-spatial-tracking; fullscreen; autoplay; clipboard-write; geolocation; web-share"
@@ -410,14 +425,14 @@
               <p class="font-semibold">If the AR view doesn’t appear here, open it full screen:</p>
               <a id="arFallbackLink"
                  class="mt-3 inline-block px-4 py-2 rounded-xl bg-brand text-white font-semibold"
-                 href="#"
+                 href="./ARAPP.html"
                  target="_blank"
-                 rel="noopener">Open AR demo</a>
+                 rel="noopener">Open AR app</a>
               <p class="mt-2 text-xs text-white/70">Some mobile browsers require AR to run outside an iframe.</p>
             </div>
           </div>
         </div>
-        <p class="text-xs text-slate-500 mt-3">Tip: include a simple marker/target image here for fallback tracking.</p>
+        <p class="text-xs text-slate-500 mt-3">Tip: aim your phone at your physical presentation card to lock tracking.</p>
       </div>
     </div>
   </section>
@@ -462,6 +477,32 @@
       <p class="mt-2">© <span id="year"></span> Josue Balderrama — Core Innovation Lead</p>
     </div>
   </footer>
+
+  <!-- HOW IT WORKS MODAL -->
+  <div id="howBackdrop" class="modal-backdrop"></div>
+  <div id="howModal" class="modal-panel hidden">
+    <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-[92vw] p-6 relative">
+      <button id="howClose" type="button" class="absolute top-3 right-3 px-2 py-1 rounded-md bg-slate-100 hover:bg-slate-200">
+        Close
+      </button>
+      <h4 class="text-xl font-bold">How it works</h4>
+      <ol class="mt-4 space-y-3 text-slate-700 list-decimal list-inside">
+        <li><span class="font-semibold">Launch:</span> Tap <em>Launch AR App</em> or scan the QR on this page.</li>
+        <li><span class="font-semibold">Permissions:</span> Allow <em>camera</em> and <em>motion</em> access when prompted.</li>
+        <li><span class="font-semibold">Target:</span> Place your <em>physical presentation card</em> on a flat, well-lit surface.</li>
+        <li><span class="font-semibold">Track:</span> Point your phone at the card until the 3D content stabilizes.</li>
+        <li><span class="font-semibold">Tips:</span> Avoid glare, keep the whole card in frame, and move slowly for lock-on.</li>
+      </ol>
+      <div class="mt-5">
+        <p class="text-sm text-slate-600 mb-2">Target image (use your physical card):</p>
+        <img id="arTargetImg"
+             class="w-full rounded-xl border border-slate-200"
+             alt="AR target — presentation card"
+             src="https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Screenshot%202025-09-04%20173221.png">
+        <!-- Replace the src above with a clean photo of your actual card for the best results -->
+      </div>
+    </div>
+  </div>
 
   <script>
     // Icons
@@ -641,36 +682,45 @@
 
     // ---------- AR Embed wiring ----------
     (function initAR(){
-      // Set your AR app here (8th Wall / A-Frame / custom). One place to change.
-      const DEFAULT_AR_URL = "//cdn.8thwall.com/web/share/embed8.js"; // <-- Replace with your real AR URL
+      // Use your AR page in the repo
+      const DEFAULT_AR_URL = "./ARAPP.html";
       const arLinkBtn = document.getElementById('arLink');
       const arFrame = document.getElementById('arFrame');
       const arFallback = document.getElementById('arFallback');
       const arFallbackLink = document.getElementById('arFallbackLink');
 
-      const AR_URL = (arLinkBtn && arLinkBtn.getAttribute('href')) || DEFAULT_AR_URL;
+      const AR_URL = DEFAULT_AR_URL;
 
       // Keep link and fallback in sync
       if (arLinkBtn) arLinkBtn.href = AR_URL;
       if (arFallbackLink) arFallbackLink.href = AR_URL;
 
-      // Try to load embeddable version (append ?embed=1)
-      const embedUrl = AR_URL + (AR_URL.includes('?') ? '&' : '?') + 'embed=1';
+      // Try to embed inside the card
       if (arFrame) {
         let loaded = false;
         arFrame.addEventListener('load', () => { loaded = true; }, { once: true });
-        arFrame.src = embedUrl;
-
+        arFrame.src = AR_URL; // if your ARAPP supports ?embed=1 you can append it
         // If no load event within 3.5s, assume provider blocks iframes → show fallback
         setTimeout(() => {
           if (!loaded && arFallback) arFallback.classList.remove('hidden');
         }, 3500);
       }
+    })();
 
-      // Optional: listen for a READY postMessage from your AR app to instantly hide fallback
-      // window.addEventListener('message', (e) => {
-      //   if (e.data === 'AR_READY' && arFallback) arFallback.classList.add('hidden');
-      // });
+    // ---------- HOW IT WORKS modal ----------
+    (function modal(){
+      const openBtn = document.getElementById('howBtn');
+      const closeBtn = document.getElementById('howClose');
+      const modal = document.getElementById('howModal');
+      const backdrop = document.getElementById('howBackdrop');
+
+      const open = () => { modal.classList.remove('hidden'); backdrop.classList.add('is-open'); document.body.style.overflow='hidden'; };
+      const close = () => { modal.classList.add('hidden'); backdrop.classList.remove('is-open'); document.body.style.overflow=''; };
+
+      openBtn?.addEventListener('click', open);
+      closeBtn?.addEventListener('click', close);
+      backdrop?.addEventListener('click', close);
+      window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && !modal.classList.contains('hidden')) close(); });
     })();
   </script>
 </body>
