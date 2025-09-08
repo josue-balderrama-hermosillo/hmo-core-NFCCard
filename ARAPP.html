@@ -1,54 +1,224 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AR Experience</title>
-    <style>
-      /* Simple page framing (optional) */
-      :root { color-scheme: light dark; }
-      body {
-        margin: 0; min-height: 100svh; display: grid; place-items: center;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background: #0f1226; color: #fff;
-      }
-      .wrap { text-align: center; padding: 2rem; }
-      h1 { margin: 0 0 1rem; font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 700; }
-      p  { margin: 0 0 1.25rem; opacity: .8; }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>AR App — Josue Balderrama</title>
+  <meta name="theme-color" content="#FF6A00" />
+  <meta name="description" content="WebAR viewer that launches a hosted 8th Wall experience; includes tap-to-start and fallback to full screen." />
 
-      /* Your AR button (8th Wall will add its own small icon next to the text) */
-      .ar-btn {
-        display: inline-block; padding: .9rem 1.15rem; border-radius: 14px;
-        background: #6d28d9; color: #fff; text-decoration: none; font-weight: 700;
-        box-shadow: 0 8px 24px rgba(109,40,217,.35); transition: transform .08s ease, opacity .15s ease;
-      }
-      .ar-btn:hover { opacity: .95; transform: translateY(-1px); }
-    </style>
-  </head>
-  <body>
-    <main class="wrap">
-      <h1>Open the AR Experience</h1>
-      <p>Tap on mobile, or scan the QR on desktop.</p>
+  <!-- Minimal styling -->
+  <style>
+    :root { --brand:#FF6A00; --ink:#0f172a; --bg:#0b1220; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; background:#000; color:#fff; }
 
-      <!-- Replace data-8code value if your code changes -->
-      <a
-        class="ar-btn"
-        data-8code="75ewg"
-        data-dark-theme
-        aria-label="Launch AR experience"
-      >Launch AR</a>
+    /* Full-viewport stage */
+    .stage { position: fixed; inset: 0; background:#000; }
+    iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
 
-      <noscript>
-        <p>JavaScript is required. Open on your phone: <a href="https://8th.io/75ewg">https://8th.io/75ewg</a></p>
-      </noscript>
+    /* Tap-to-start overlay */
+    #tapToStart {
+      position: fixed; inset: 0; display: grid; place-items: center;
+      background: rgba(15, 23, 42, 0.92); z-index: 40; text-align:center; padding: 2rem;
+    }
+    #tapToStart.hidden { display: none; }
+    .btn {
+      display:inline-block; background: var(--brand); color:#fff; font-weight:700;
+      padding:.85rem 1.2rem; border-radius: 14px; border:0; cursor:pointer; letter-spacing:.2px;
+    }
+    .btn.secondary { background: transparent; border: 2px solid #ffffff33; font-weight:600; }
+    .muted { opacity:.8; }
+
+    /* Top bar */
+    .topbar {
+      position: fixed; inset-inline: 0; top: 0; height: 56px; display:flex; align-items:center; justify-content: space-between;
+      padding: 0 .75rem; z-index: 30; pointer-events: none;
+      background: linear-gradient(to bottom, rgba(0,0,0,.65), rgba(0,0,0,0));
+    }
+    .topbar .group { display:flex; gap:.5rem; pointer-events: auto; }
+    .chip {
+      display:inline-flex; align-items:center; gap:.5rem; padding:.45rem .7rem;
+      background: rgba(17,24,39,.6); border:1px solid rgba(255,255,255,.15); color:#fff;
+      border-radius: 12px; font-size:.85rem; font-weight:600; backdrop-filter: blur(6px);
+      text-decoration: none;
+    }
+
+    /* Fallback panel if iframe is blocked */
+    #fallback {
+      position:absolute; inset:0; display:none; place-items:center; text-align:center;
+      background: rgba(2,6,23,.9); z-index: 20; padding: 2rem;
+    }
+    #fallback.visible { display:grid; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset:0; background: rgba(0,0,0,.6); display:none; z-index:50;
+    }
+    .modal-backdrop.visible { display:block; }
+    .modal {
+      position: fixed; inset: 10% 50% auto 50%; transform: translate(-50%,0);
+      background:#0b1220; color:#e5e7eb; border:1px solid #1f2937; border-radius: 14px; width:min(680px, 92vw);
+      z-index:60; display:none; box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    .modal.visible { display:block; }
+    .modal header, .modal footer { padding: 14px 16px; border-bottom:1px solid #1f2937; }
+    .modal header { display:flex; align-items:center; justify-content:space-between; }
+    .modal main { padding: 14px 16px; }
+    .modal h3 { margin:0; font-size:1rem; }
+    .x { background:transparent; border:0; color:#fff; font-size:1.2rem; cursor:pointer; }
+    ol { margin: .5rem 0 0 1.1rem; }
+    li { margin:.3rem 0; }
+    .target {
+      margin-top: .75rem; background:#0a0f1c; border:1px dashed #374151; border-radius:12px; padding:.75rem;
+      display:flex; gap:.75rem; align-items:center;
+    }
+    .target img { width:72px; height:72px; object-fit:cover; border-radius:10px; background:#111827; }
+    .note { font-size:.85rem; color:#9ca3af; }
+  </style>
+</head>
+
+<body>
+  <!-- Controls / actions -->
+  <div class="topbar">
+    <div class="group">
+      <a class="chip" href="./index.html#ar" aria-label="Back">⟵ Back</a>
+    </div>
+    <div class="group">
+      <button id="howBtn" class="chip" type="button">How it works</button>
+      <a id="openBtn" class="chip" target="_blank" rel="noopener">Open Full Screen</a>
+    </div>
+  </div>
+
+  <!-- Stage (we’ll try to load AR here) -->
+  <div class="stage">
+    <iframe id="arFrame"
+      title="8th Wall WebAR"
+      allow="camera; microphone; gyroscope; accelerometer; magnetometer; xr-spatial-tracking; fullscreen; autoplay; clipboard-write; geolocation; web-share"
+      referrerpolicy="no-referrer-when-downgrade"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
+    </iframe>
+
+    <!-- Shown if provider blocks iframes -->
+    <div id="fallback">
+      <div>
+        <h2>Open the AR experience full screen</h2>
+        <p class="muted">Some mobile browsers require AR to run outside an embedded frame.</p>
+        <p style="margin-top:1rem">
+          <a id="fallbackLink" class="btn" target="_blank" rel="noopener">Launch AR</a>
+        </p>
+        <p class="note" style="margin-top:.5rem">Tip: If nothing happens, check that the site is opened over HTTPS and your browser allows camera access.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tap-to-start (user gesture to satisfy permission policies) -->
+  <div id="tapToStart" role="dialog" aria-modal="true" aria-label="Tap to start AR">
+    <div>
+      <h2 style="font-size:1.1rem;margin:0 0 .25rem">Tap to start AR</h2>
+      <p class="muted" style="margin:.25rem 0 1rem">We’ll request camera (and motion on iOS) to place content in your space.</p>
+      <button id="startBtn" class="btn" type="button">Start</button>
+      <div style="margin-top:.75rem">
+        <button id="howBtn2" class="btn secondary" type="button">How it works</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: How it works -->
+  <div id="howBackdrop" class="modal-backdrop"></div>
+  <section id="howModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="howTitle" aria-describedby="howBody">
+    <header>
+      <h3 id="howTitle">How it works</h3>
+      <button class="x" id="howClose" aria-label="Close">✕</button>
+    </header>
+    <main id="howBody">
+      <p>Point your phone’s camera at the <b>physical presentation card</b> to trigger the experience. Follow these steps:</p>
+      <ol>
+        <li>Tap <b>Start</b> and allow camera access when prompted.</li>
+        <li>Hold your phone over the card, keep it fully in view, and good lighting.</li>
+        <li>Move slowly to let the tracker lock; digital content will appear anchored to the card.</li>
+      </ol>
+      <div class="target">
+        <img src="https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Screenshot%202025-09-04%20173221.png" alt="Presentation card (target)">
+        <div>
+          <div class="muted">Target: Physical presentation card</div>
+          <div class="note">This is the image the AR experience is trained to recognize.</div>
+        </div>
+      </div>
+      <p class="note" style="margin-top:.75rem">
+        If the embedded view doesn’t show camera, use <b>Open Full Screen</b>. Some browsers block camera in iframes.
+      </p>
     </main>
+    <footer>
+      <button class="btn" id="howOk" type="button">Got it</button>
+    </footer>
+  </section>
 
-    <!-- 8th Wall embed script (HTTPS explicit) -->
-    <script src="https://cdn.8thwall.com/web/share/embed8.js"></script>
+  <script>
+    // ---- CONFIG ----
+    // Your hosted 8th Wall "share" URL (from data-8code="75ewg")
+    const AR_URL = "https://8th.io/75ewg";
 
-    <!-- Optional: auto-open the popover on desktop (set true to enable) -->
-    <script>
-      // window.embed8?.attach({ expandFirst: true });
-    </script>
-  </body>
+    // Wire buttons/links
+    const startBtn = document.getElementById('startBtn');
+    const tapOverlay = document.getElementById('tapToStart');
+    const frame = document.getElementById('arFrame');
+    const fallback = document.getElementById('fallback');
+    const fallbackLink = document.getElementById('fallbackLink');
+    const openBtn = document.getElementById('openBtn');
+
+    openBtn.href = AR_URL;
+    fallbackLink.href = AR_URL;
+
+    // Simple iOS motion permission helper
+    async function requestMotionIfNeeded() {
+      const DME = window.DeviceMotionEvent;
+      if (DME && typeof DME.requestPermission === 'function') {
+        try { return (await DME.requestPermission()) === 'granted'; } catch { return false; }
+      }
+      return true;
+    }
+
+    // We do not request camera ourselves since the camera must be granted to 8th.io (its own origin).
+    // Instead we use a user gesture to begin loading that page, which will prompt for camera immediately.
+    async function startAR() {
+      await requestMotionIfNeeded();
+
+      tapOverlay.classList.add('hidden');
+
+      // Try to embed — some providers allow ?embed=1 for friendlier framing.
+      const tryUrl = AR_URL + (AR_URL.includes('?') ? '&' : '?') + 'embed=1';
+      let loaded = false;
+
+      frame.addEventListener('load', () => { loaded = true; }, { once:true });
+      frame.src = tryUrl;
+
+      // If no load after 3.5s, assume blocked -> show fallback
+      setTimeout(() => {
+        if (!loaded) fallback.classList.add('visible');
+      }, 3500);
+    }
+    startBtn.addEventListener('click', startAR, { once:true });
+
+    // ---- "How it works" modal ----
+    const howBackdrop = document.getElementById('howBackdrop');
+    const howModal = document.getElementById('howModal');
+    const howBtn = document.getElementById('howBtn');
+    const howBtn2 = document.getElementById('howBtn2');
+    const howClose = document.getElementById('howClose');
+    const howOk = document.getElementById('howOk');
+
+    function openHow(){ howBackdrop.classList.add('visible'); howModal.classList.add('visible'); }
+    function closeHow(){ howBackdrop.classList.remove('visible'); howModal.classList.remove('visible'); }
+    [howBtn, howBtn2].forEach(b => b && b.addEventListener('click', openHow));
+    [howClose, howOk, howBackdrop].forEach(b => b && b.addEventListener('click', closeHow));
+
+    // Bonus: auto-open on first visit to help users
+    if (!sessionStorage.getItem('ar_how_seen')) {
+      sessionStorage.setItem('ar_how_seen','1');
+      setTimeout(openHow, 600);
+    }
+  </script>
+</body>
 </html>
