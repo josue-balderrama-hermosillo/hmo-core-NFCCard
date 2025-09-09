@@ -10,7 +10,9 @@
   <meta property="og:description" content="BIM/VDC Innovation — Hermosillo & BIM GEN. Connect, view demos, and save contact." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Screenshot%202025-09-04%20173221.png" />
-  <meta name="theme-color" content="#FF6A00" />
+  <meta name="theme-color" content="#FF6A00" id="theme-color">
+  <meta name="msapplication-TileColor" content="#FF6A00" id="ms-tilecolor">
+
 
   <!-- Inter font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -170,6 +172,14 @@
       setVar('--brand-gray', t.colors.gray);
       setVar('--mark-bg', t.markBg);
 
+      // Browser UI top bar color (Android Chrome, some PWAs)
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute('content', t.colors.orange);
+
+      // Optional: Windows tile color
+      const tileMeta = document.querySelector('meta[name="msapplication-TileColor"]');
+      if (tileMeta) tileMeta.setAttribute('content', t.colors.orange);
+      
       // Header brand
       $('#brandName').textContent = t.name;
       $('#brandTagline').textContent = t.tagline;
