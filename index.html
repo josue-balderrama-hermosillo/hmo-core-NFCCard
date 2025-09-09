@@ -73,15 +73,25 @@
     .expander-toolbar{position:absolute; top:.5rem; right:.5rem; display:flex; gap:.5rem; z-index:5;}
     .expander-toolbar a, .expander-toolbar button{background:var(--brand-orange); color:#fff; font-weight:600; padding:.45rem .7rem; border-radius:.75rem; font-size:.85rem;}
 
-    /* ---- Portrait helper (in case Tailwind's aspect utility isn't present) ---- */
-    .phone-aspect { aspect-ratio: 9 / 16; }
-    .video-shadow { box-shadow: 0 20px 50px rgba(0,0,0,.25); }
-    
-    /* ---- Modal ---- */
-    .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:90;}
-    .modal-backdrop.is-open{opacity:1; pointer-events:auto;}
-    .modal-panel{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:100; pointer-events:none;}
-    .modal-card{pointer-events:auto; width:min(720px,94vw); max-height:88vh; overflow:auto; background:#fff; border-radius:1rem; padding:1rem;}
+    /* ---- AR section (video phone frame) ---- */
+    .phone-portrait{position:relative; aspect-ratio:9/16; border-radius:1rem; overflow:hidden; background:#000;}
+    .phone-portrait video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+
+    /* ---- Modal (How it works) ---- */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.6);
+      opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:90;
+    }
+    .modal-backdrop.is-open{ opacity:1; pointer-events:auto; }
+    .modal-panel{
+      position:fixed; inset:0; display:none;
+      align-items:center; justify-content:center;
+      z-index:100; opacity:0; pointer-events:none; transition:opacity .2s ease;
+    }
+    .modal-panel.is-open{ display:flex; opacity:1; pointer-events:auto; }
+    .modal-card{ width:min(980px,96vw); max-height:88vh; overflow:auto; background:#fff; border-radius:1rem; }
+    .modal-header{display:flex; align-items:center; justify-content:space-between; padding:1rem 1rem 0 1rem;}
+    .modal-body{padding:1rem;}
   </style>
 </head>
 <body class="bg-white text-slate-800">
@@ -197,10 +207,6 @@
       if (window.__qrInstance) window.__qrInstance.set({ value: shareUrl });
 
       if (typeof updateSwitchUI === 'function') updateSwitchUI(key);
-
-      // Update target image in "How it works"
-      const targetImg = $('#howTargetImg');
-      if (targetImg) targetImg.src = t.logos.mark;
     }
     function formatPhone(p) { return p.replace(/^\+52(\d{3})(\d{3})(\d{4})$/, '+52 ($1) $2 $3'); }
   </script>
@@ -310,6 +316,7 @@
       </div>
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
+
         <!-- Card 1 -->
         <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
                  data-title="ACC Dashboards Overnight"
@@ -390,6 +397,7 @@
             <a class="text-brand font-semibold text-sm" href="./industrial-park-demo.html" target="_blank" rel="noopener noreferrer">Open demo</a>
           </div>
         </article>
+
       </div>
     </div>
   </section>
@@ -400,87 +408,24 @@
       <div>
         <h3 class="text-xl font-bold">AR Spot — See it in your space</h3>
         <p class="mt-2 text-slate-600">
-          Watch a quick portrait video of the experience below, then launch the live app powered by 8th Wall.
+          Watch a quick capture of the AR experience below, or tap <strong>Launch AR Demo</strong> to open the live 8th Wall app.
         </p>
-        <div class="mt-4 flex flex-wrap gap-3">
-          <a id="arLink" href="https://8th.io/75ewg" target="_blank" rel="noopener noreferrer"
-             class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR App</a>
-          <button id="howBtn" type="button"
-             class="px-4 py-2 rounded-xl border border-slate-300 font-semibold hover:bg-slate-50">How it works</button>
+        <div class="mt-4 flex gap-3">
+          <a id="arLink" href="https://8th.io/75ewg" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR Demo</a>
+          <button id="howBtn" type="button" class="px-4 py-2 rounded-xl border border-slate-300">How it works</button>
         </div>
-        <p class="mt-3 text-xs text-slate-500">Use your physical presentation card as the target for tracking.</p>
+        <p class="mt-3 text-xs text-slate-500">Use your physical presentation card as the target. Good lighting helps.</p>
       </div>
 
-      <!-- Portrait video preview -->
+      <!-- In-card portrait video preview -->
       <div class="rounded-2xl border border-slate-200 p-6">
-        <div class="relative phone-aspect aspect-[9/16] rounded-xl overflow-hidden bg-black mx-auto max-h-[90vh] video-shadow">
-          <!-- Replace src/poster with your actual files -->
-          <video id="arPreviewVideo"
-                 class="absolute inset-0 w-full h-full object-cover"
-                 src="./assets/ar-demo-portrait.mp4"
-                 poster="./assets/ar-poster.jpg"
-                 playsinline
-                 muted
-                 autoplay
-                 loop
-                 controls>
-              Sorry, your browser doesn’t support embedded videos.
-          </video>
+        <div class="phone-portrait mx-auto max-h-[90vh]">
+          <video id="arPreviewVideo" src="./assets/ar-demo.mp4" muted autoplay playsinline loop controls></video>
         </div>
-        <p class="text-xs text-slate-500 mt-3">Tip: Open the live AR in a new tab for camera access and full performance.</p>
+        <p class="text-xs text-slate-500 mt-3">Replace <code>./assets/ar-demo.mp4</code> with your 9:16 video of the AR app.</p>
       </div>
     </div>
   </section>
-
-  <!-- HOW IT WORKS MODAL -->
-  <div id="howBackdrop" class="modal-backdrop"></div>
-  <div id="howPanel" class="modal-panel" aria-hidden="true">
-    <section class="modal-card">
-      <header class="flex items-start justify-between gap-4 p-2">
-        <div>
-          <h4 class="text-lg font-extrabold">How it works</h4>
-          <p class="text-sm text-slate-600">Quick steps to get the best AR experience.</p>
-        </div>
-        <button id="howClose" class="px-3 py-1.5 rounded-lg bg-brand text-white font-semibold">Close</button>
-      </header>
-      <hr class="my-2">
-      <div class="grid md:grid-cols-3 gap-4 p-2">
-        <div class="md:col-span-2">
-          <ol class="space-y-3 text-sm text-slate-700">
-            <li class="flex items-start gap-3">
-              <i data-lucide="external-link" class="w-4 h-4 mt-1"></i>
-              <span><strong>Tap “Launch AR App”.</strong> This opens 8th Wall in a new tab where the camera can be used.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="shield" class="w-4 h-4 mt-1"></i>
-              <span><strong>Allow Camera.</strong> When prompted, grant camera access.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="credit-card" class="w-4 h-4 mt-1"></i>
-              <span><strong>Aim at your presentation card.</strong> Use this card as the tracking target. Good lighting helps.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="move" class="w-4 h-4 mt-1"></i>
-              <span><strong>Move slowly.</strong> Back up ~0.5–1.0 m if needed to get the full card in view.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <i data-lucide="refresh-cw" class="w-4 h-4 mt-1"></i>
-              <span><strong>Troubleshooting:</strong> If tracking is lost, re-center on the card or relaunch the app.</span>
-            </li>
-          </ol>
-        </div>
-        <aside class="md:col-span-1">
-          <div class="rounded-xl border border-slate-200 p-3 bg-slate-50">
-            <p class="text-xs text-slate-500 mb-2">Target image</p>
-            <img id="howTargetImg"
-                 class="w-full rounded-lg object-contain bg-white"
-                 src="https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/H2.png"
-                 alt="Presentation card target" />
-          </div>
-        </aside>
-      </div>
-    </section>
-  </div>
 
   <!-- CONTACT -->
   <section id="contact" class="bg-brand-navy text-white py-12">
@@ -522,6 +467,41 @@
       <p class="mt-2">© <span id="year"></span> Josue Balderrama — Core Innovation Lead</p>
     </div>
   </footer>
+
+  <!-- HOW IT WORKS MODAL -->
+  <div id="howBackdrop" class="modal-backdrop"></div>
+  <div id="howPanel" class="modal-panel" aria-hidden="true">
+    <div class="modal-card shadow-soft border border-slate-100">
+      <div class="modal-header">
+        <h3 class="text-2xl font-extrabold tracking-tight px-3">How it works</h3>
+        <button id="howClose" class="px-3 py-2 rounded-xl bg-brand text-white font-semibold mr-3">Close</button>
+      </div>
+      <div class="modal-body">
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="md:col-span-2">
+            <p class="text-slate-600 mb-3">Quick steps to get the best AR experience.</p>
+            <ul class="space-y-3 text-slate-700">
+              <li class="flex gap-2"><i data-lucide="external-link" class="w-5 h-5 shrink-0 mt-0.5"></i><span><strong>Tap “Launch AR Demo”.</strong> This opens 8th Wall in a new tab where the camera can be used.</span></li>
+              <li class="flex gap-2"><i data-lucide="shield-check" class="w-5 h-5 shrink-0 mt-0.5"></i><span><strong>Allow Camera.</strong> When prompted, grant camera access.</span></li>
+              <li class="flex gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 mt-0.5"></i><span><strong>Aim at your presentation card.</strong> Use this card as the tracking target. Good lighting helps.</span></li>
+              <li class="flex gap-2"><i data-lucide="move" class="w-5 h-5 shrink-0 mt-0.5"></i><span><strong>Move slowly.</strong> Back up ~0.5–1.0 m if needed to get the full card in view.</span></li>
+              <li class="flex gap-2"><i data-lucide="life-buoy" class="w-5 h-5 shrink-0 mt-0.5"></i><span><strong>Troubleshooting:</strong> If tracking is lost, re-center on the card or relaunch the app.</span></li>
+            </ul>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-2">Target image</label>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-2">
+              <img
+                src="https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/refs/heads/main/Screenshot%202025-09-04%20173221.png"
+                alt="Presentation card target"
+                class="w-full h-[260px] object-contain rounded-lg bg-white" />
+            </div>
+            <p class="text-xs text-slate-500 mt-2">Use your physical presentation card as the target when the AR app opens.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     // Icons
@@ -582,7 +562,7 @@
     };
     syncContacts(); const _applyThemeOrig = applyTheme; applyTheme = function(key){ _applyThemeOrig(key); syncContacts(); };
 
-    // ---------- Lazy-load live previews inside showcase cards ----------
+    // ---------- Lazy-load live previews inside cards ----------
     const previewIframes = document.querySelectorAll('.cardPreview');
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => {
@@ -599,11 +579,9 @@
       });
     }, { rootMargin: '200px' });
     previewIframes.forEach(ifr => io.observe(ifr));
-
-    // Prevent link clicks inside cards from opening the expander
     document.querySelectorAll('#showcase article a').forEach(a => a.addEventListener('click', e => e.stopPropagation()));
 
-    // ---------- FLIP grow animation from card to full view ----------
+    // ---------- FLIP open from card ----------
     function cleanOpenUrl(url) {
       try {
         const u = new URL(url, location.href);
@@ -621,13 +599,11 @@
       const rect  = card.getBoundingClientRect();
       const start = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
 
-      // Backdrop
       const backdrop = document.createElement('div');
       backdrop.className = 'expander-backdrop';
       document.body.appendChild(backdrop);
       requestAnimationFrame(()=>backdrop.classList.add('is-visible'));
 
-      // Expander panel
       const expander = document.createElement('div');
       expander.className = 'expander is-animating';
       Object.assign(expander.style, { left: `${start.left}px`, top: `${start.top}px`, width: `${start.width}px`, height: `${start.height}px`, borderRadius: '1rem' });
@@ -649,7 +625,12 @@
 
       const maxW = Math.min(window.innerWidth * 0.92, 1152);
       const maxH = Math.round(window.innerHeight * 0.82);
-      const target = { width: Math.round(maxW), height: Math.round(maxH), left: Math.round((window.innerWidth - maxW)/2), top: Math.round((window.innerHeight - maxH)/2) };
+      const target = {
+        width:  Math.round(maxW),
+        height: Math.round(maxH),
+        left:   Math.round((window.innerWidth - maxW) / 2),
+        top:    Math.round((window.innerHeight - maxH) / 2)
+      };
 
       requestAnimationFrame(() => {
         Object.assign(expander.style, {
@@ -685,7 +666,7 @@
       card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     });
 
-    // ---------- How it works modal ----------
+    // ---------- Modal (How it works) ----------
     const howBtn = document.getElementById('howBtn');
     const howBackdrop = document.getElementById('howBackdrop');
     const howPanel = document.getElementById('howPanel');
@@ -693,17 +674,20 @@
 
     function openHow(){
       howBackdrop.classList.add('is-open');
+      howPanel.classList.add('is-open');
       howPanel.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
     }
     function closeHow(){
       howBackdrop.classList.remove('is-open');
+      howPanel.classList.remove('is-open');
       howPanel.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
     }
     if (howBtn) howBtn.addEventListener('click', openHow);
     if (howClose) howClose.addEventListener('click', closeHow);
     if (howBackdrop) howBackdrop.addEventListener('click', closeHow);
     window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeHow(); });
-
   </script>
 </body>
 </html>
