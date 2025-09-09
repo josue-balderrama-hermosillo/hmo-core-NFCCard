@@ -73,20 +73,15 @@
     .expander-toolbar{position:absolute; top:.5rem; right:.5rem; display:flex; gap:.5rem; z-index:5;}
     .expander-toolbar a, .expander-toolbar button{background:var(--brand-orange); color:#fff; font-weight:600; padding:.45rem .7rem; border-radius:.75rem; font-size:.85rem;}
 
-    /* ---- AR in-page start overlay ---- */
-    .ar-start-overlay{
-      position:absolute; inset:0; display:grid; place-items:center;
-      background:radial-gradient(1200px 1200px at 50% 50%, rgba(15,23,42,.9) 0%, rgba(0,0,0,.95) 60%, rgba(0,0,0,1) 100%);
-      color:#fff; z-index:5; padding:1.25rem; text-align:center;
-    }
-    .ar-start-overlay.hidden{display:none}
-    .ar-start-btn{
-      background:var(--brand-orange); color:#fff; font-weight:800; letter-spacing:.3px;
-      padding:.85rem 1.1rem; border-radius:14px; border:0; cursor:pointer; width:min(92%, 420px);
-      box-shadow:0 10px 30px rgba(255,106,0,.25);
-    }
-    .ar-fallback{position:absolute; inset:0; display:none; place-items:center; text-align:center; background:rgba(2,6,23,.9); color:#fff; z-index:4; padding:1rem;}
-    .ar-fallback.visible{display:grid}
+    /* ---- Portrait helper (in case Tailwind's aspect utility isn't present) ---- */
+    .phone-aspect { aspect-ratio: 9 / 16; }
+    .video-shadow { box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+    
+    /* ---- Modal ---- */
+    .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:90;}
+    .modal-backdrop.is-open{opacity:1; pointer-events:auto;}
+    .modal-panel{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:100; pointer-events:none;}
+    .modal-card{pointer-events:auto; width:min(720px,94vw); max-height:88vh; overflow:auto; background:#fff; border-radius:1rem; padding:1rem;}
   </style>
 </head>
 <body class="bg-white text-slate-800">
@@ -202,6 +197,10 @@
       if (window.__qrInstance) window.__qrInstance.set({ value: shareUrl });
 
       if (typeof updateSwitchUI === 'function') updateSwitchUI(key);
+
+      // Update target image in "How it works"
+      const targetImg = $('#howTargetImg');
+      if (targetImg) targetImg.src = t.logos.mark;
     }
     function formatPhone(p) { return p.replace(/^\+52(\d{3})(\d{3})(\d{4})$/, '+52 ($1) $2 $3'); }
   </script>
@@ -311,7 +310,6 @@
       </div>
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
-
         <!-- Card 1 -->
         <article class="group rounded-2xl bg-white shadow-soft border border-slate-100 overflow-hidden cursor-pointer hover:shadow-lg transition"
                  data-title="ACC Dashboards Overnight"
@@ -392,7 +390,6 @@
             <a class="text-brand font-semibold text-sm" href="./industrial-park-demo.html" target="_blank" rel="noopener noreferrer">Open demo</a>
           </div>
         </article>
-
       </div>
     </div>
   </section>
@@ -403,54 +400,87 @@
       <div>
         <h3 class="text-xl font-bold">AR Spot — See it in your space</h3>
         <p class="mt-2 text-slate-600">
-          Tap <strong>Start AR in-page</strong> to load the WebAR experience right here (If it doesnt start, click Launch AR Demo).  
-          Or use <strong>Launch AR Demo</strong> to open a full-screen page.
+          Watch a quick portrait video of the experience below, then launch the live app powered by 8th Wall.
         </p>
-        <div class="mt-4 flex gap-3">
-          <!-- Fullscreen page (your ARAPP.html) -->
-          <a id="arLink" href="./ARAPP.html" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR Demo</a>
-          <!-- Optional: “How it works” trigger could go here if you want a modal -->
+        <div class="mt-4 flex flex-wrap gap-3">
+          <a id="arLink" href="https://8th.io/75ewg" target="_blank" rel="noopener noreferrer"
+             class="px-4 py-2 rounded-xl bg-brand text-white font-semibold">Launch AR App</a>
+          <button id="howBtn" type="button"
+             class="px-4 py-2 rounded-xl border border-slate-300 font-semibold hover:bg-slate-50">How it works</button>
         </div>
-        <p class="mt-3 text-xs text-slate-500">Ensure good lighting and aim at your physical presentation card for tracking.</p>
+        <p class="mt-3 text-xs text-slate-500">Use your physical presentation card as the target for tracking.</p>
       </div>
 
-      <!-- In-card AR with user-gesture start -->
+      <!-- Portrait video preview -->
       <div class="rounded-2xl border border-slate-200 p-6">
-        <div class="relative aspect-[9/16] rounded-xl overflow-hidden bg-black mx-auto max-h-[90vh]">
-          <!-- Start overlay (user gesture) -->
-          <div id="arStartOverlay" class="ar-start-overlay">
-            <div>
-              <h4 class="font-extrabold text-white text-lg">Start AR in-page</h4>
-              <p class="text-white/80 text-sm mt-1">We’ll request camera right away so you can aim at your card.</p>
-              <button id="arStartBtn" class="ar-start-btn mt-3" type="button">Start AR</button>
-              <p class="text-white/60 text-[11px] mt-2">If it doesn’t appear, use the fullscreen button instead.</p>
-            </div>
-          </div>
-
-          <iframe id="arFrame"
-                  title="AR Demo"
-                  class="absolute inset-0 w-full h-full"
-                  src="about:blank"
-                  allow="camera; microphone; gyroscope; accelerometer; magnetometer; xr-spatial-tracking; fullscreen; autoplay; clipboard-write; geolocation; web-share"
-                  allowfullscreen
-                  referrerpolicy="no-referrer-when-downgrade"></iframe>
-
-          <div id="arFallback" class="ar-fallback">
-            <div class="text-center px-6">
-              <p class="font-semibold">Open the AR experience full screen</p>
-              <a id="arFallbackLink"
-                 class="mt-3 inline-block px-4 py-2 rounded-xl bg-brand text-white font-semibold"
-                 href="./ARAPP.html"
-                 target="_blank"
-                 rel="noopener">Open AR demo</a>
-              <p class="mt-2 text-xs text-white/70">Some mobile browsers require AR to run outside an iframe.</p>
-            </div>
-          </div>
+        <div class="relative phone-aspect aspect-[9/16] rounded-xl overflow-hidden bg-black mx-auto max-h-[90vh] video-shadow">
+          <!-- Replace src/poster with your actual files -->
+          <video id="arPreviewVideo"
+                 class="absolute inset-0 w-full h-full object-cover"
+                 src="./assets/ar-demo-portrait.mp4"
+                 poster="./assets/ar-poster.jpg"
+                 playsinline
+                 muted
+                 autoplay
+                 loop
+                 controls>
+              Sorry, your browser doesn’t support embedded videos.
+          </video>
         </div>
-        <p class="text-xs text-slate-500 mt-3">Tip: include a simple marker/target image here for fallback tracking.</p>
+        <p class="text-xs text-slate-500 mt-3">Tip: Open the live AR in a new tab for camera access and full performance.</p>
       </div>
     </div>
   </section>
+
+  <!-- HOW IT WORKS MODAL -->
+  <div id="howBackdrop" class="modal-backdrop"></div>
+  <div id="howPanel" class="modal-panel" aria-hidden="true">
+    <section class="modal-card">
+      <header class="flex items-start justify-between gap-4 p-2">
+        <div>
+          <h4 class="text-lg font-extrabold">How it works</h4>
+          <p class="text-sm text-slate-600">Quick steps to get the best AR experience.</p>
+        </div>
+        <button id="howClose" class="px-3 py-1.5 rounded-lg bg-brand text-white font-semibold">Close</button>
+      </header>
+      <hr class="my-2">
+      <div class="grid md:grid-cols-3 gap-4 p-2">
+        <div class="md:col-span-2">
+          <ol class="space-y-3 text-sm text-slate-700">
+            <li class="flex items-start gap-3">
+              <i data-lucide="external-link" class="w-4 h-4 mt-1"></i>
+              <span><strong>Tap “Launch AR App”.</strong> This opens 8th Wall in a new tab where the camera can be used.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i data-lucide="shield" class="w-4 h-4 mt-1"></i>
+              <span><strong>Allow Camera.</strong> When prompted, grant camera access.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i data-lucide="credit-card" class="w-4 h-4 mt-1"></i>
+              <span><strong>Aim at your presentation card.</strong> Use this card as the tracking target. Good lighting helps.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i data-lucide="move" class="w-4 h-4 mt-1"></i>
+              <span><strong>Move slowly.</strong> Back up ~0.5–1.0 m if needed to get the full card in view.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <i data-lucide="refresh-cw" class="w-4 h-4 mt-1"></i>
+              <span><strong>Troubleshooting:</strong> If tracking is lost, re-center on the card or relaunch the app.</span>
+            </li>
+          </ol>
+        </div>
+        <aside class="md:col-span-1">
+          <div class="rounded-xl border border-slate-200 p-3 bg-slate-50">
+            <p class="text-xs text-slate-500 mb-2">Target image</p>
+            <img id="howTargetImg"
+                 class="w-full rounded-lg object-contain bg-white"
+                 src="https://raw.githubusercontent.com/josue-balderrama-hermosillo/hmo-core-NFCCard/1df5fa35829ad8380eb70e3e75e1d0f3f2dffa95/H2.png"
+                 alt="Presentation card target" />
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
 
   <!-- CONTACT -->
   <section id="contact" class="bg-brand-navy text-white py-12">
@@ -552,7 +582,7 @@
     };
     syncContacts(); const _applyThemeOrig = applyTheme; applyTheme = function(key){ _applyThemeOrig(key); syncContacts(); };
 
-    // ---------- Lazy-load live previews inside cards ----------
+    // ---------- Lazy-load live previews inside showcase cards ----------
     const previewIframes = document.querySelectorAll('.cardPreview');
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => {
@@ -570,9 +600,10 @@
     }, { rootMargin: '200px' });
     previewIframes.forEach(ifr => io.observe(ifr));
 
+    // Prevent link clicks inside cards from opening the expander
     document.querySelectorAll('#showcase article a').forEach(a => a.addEventListener('click', e => e.stopPropagation()));
 
-    // ---------- FLIP open from card ----------
+    // ---------- FLIP grow animation from card to full view ----------
     function cleanOpenUrl(url) {
       try {
         const u = new URL(url, location.href);
@@ -590,11 +621,13 @@
       const rect  = card.getBoundingClientRect();
       const start = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
 
+      // Backdrop
       const backdrop = document.createElement('div');
       backdrop.className = 'expander-backdrop';
       document.body.appendChild(backdrop);
       requestAnimationFrame(()=>backdrop.classList.add('is-visible'));
 
+      // Expander panel
       const expander = document.createElement('div');
       expander.className = 'expander is-animating';
       Object.assign(expander.style, { left: `${start.left}px`, top: `${start.top}px`, width: `${start.width}px`, height: `${start.height}px`, borderRadius: '1rem' });
@@ -616,12 +649,7 @@
 
       const maxW = Math.min(window.innerWidth * 0.92, 1152);
       const maxH = Math.round(window.innerHeight * 0.82);
-      const target = {
-        width:  Math.round(maxW),
-        height: Math.round(maxH),
-        left:   Math.round((window.innerWidth - maxW) / 2),
-        top:    Math.round((window.innerHeight - maxH) / 2)
-      };
+      const target = { width: Math.round(maxW), height: Math.round(maxH), left: Math.round((window.innerWidth - maxW)/2), top: Math.round((window.innerHeight - maxH)/2) };
 
       requestAnimationFrame(() => {
         Object.assign(expander.style, {
@@ -657,44 +685,25 @@
       card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     });
 
-    // ---------- AR (in-page) with user-gesture load ----------
-    (function initInPageAR(){
-      const AR_URL = "https://8th.io/75ewg"; // your 8th Wall share link (from data-8code="75ewg")
+    // ---------- How it works modal ----------
+    const howBtn = document.getElementById('howBtn');
+    const howBackdrop = document.getElementById('howBackdrop');
+    const howPanel = document.getElementById('howPanel');
+    const howClose = document.getElementById('howClose');
 
-      const startBtn = document.getElementById('arStartBtn');
-      const startOverlay = document.getElementById('arStartOverlay');
-      const arFrame = document.getElementById('arFrame');
-      const arFallback = document.getElementById('arFallback');
-      const arFallbackLink = document.getElementById('arFallbackLink');
+    function openHow(){
+      howBackdrop.classList.add('is-open');
+      howPanel.setAttribute('aria-hidden','false');
+    }
+    function closeHow(){
+      howBackdrop.classList.remove('is-open');
+      howPanel.setAttribute('aria-hidden','true');
+    }
+    if (howBtn) howBtn.addEventListener('click', openHow);
+    if (howClose) howClose.addEventListener('click', closeHow);
+    if (howBackdrop) howBackdrop.addEventListener('click', closeHow);
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeHow(); });
 
-      // Keep fullscreen fallback pointing to your standalone page
-      if (arFallbackLink) arFallbackLink.href = "./ARAPP.html";
-
-      async function requestMotionIfNeeded() {
-        const DME = window.DeviceMotionEvent;
-        if (DME && typeof DME.requestPermission === 'function') {
-          try { return (await DME.requestPermission()) === 'granted'; } catch { return false; }
-        }
-        return true;
-      }
-
-      async function startAR() {
-        await requestMotionIfNeeded();
-        if (startOverlay) startOverlay.classList.add('hidden');
-
-        const embedUrl = AR_URL + (AR_URL.includes('?') ? '&' : '?') + 'embed=1';
-        let loaded = false;
-        arFrame.addEventListener('load', () => { loaded = true; }, { once:true });
-        arFrame.src = embedUrl;
-
-        // If it doesn't load, assume provider blocks iframe → show fallback
-        setTimeout(() => {
-          if (!loaded && arFallback) arFallback.classList.add('visible');
-        }, 3500);
-      }
-
-      if (startBtn) startBtn.addEventListener('click', startAR, { once: true });
-    })();
   </script>
 </body>
 </html>
