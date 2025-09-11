@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ACC Template — Hands-on Checklist</title>
+  <meta name="description" content="Core Innovation — ACC Template Hands-on Checklist (pure HTML/JS)" />
+  <style>
+    :root{
+      --orange:#FF6A00;
+      --ink:#0F172A;
+      --ink-soft:#333a4a;
+      --paper:#fff;
+      --stroke:#ededed;
+      --shadow:0 2px 10px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    img{max-width:100%;height:auto;display:block}
+    body{
+      margin:0; font-family:Inter,Segoe UI,Roboto,system-ui,-apple-system,sans-serif; color:var(--ink);
+      background:
+        radial-gradient(1200px 800px at 10% 0%, rgba(255,106,0,0.07) 0%, transparent 50%) no-repeat,
+        linear-gradient(180deg,#ffffff 0%, #f9f9f9 100%);
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:18px 16px 42px}
+
+    /* --- Header layout & image sizing fixes --- */
+    .header-grid{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      align-items:center;
+      gap:16px;
+      margin-bottom:8px;
+    }
+    .logo-left .logo.hmo{height:40px;width:auto;max-width:220px;object-fit:contain}
+    .logo-right .logo.au{height:36px;width:auto;max-width:180px;object-fit:contain}
+    .title-stack{display:flex;flex-direction:column;gap:6px}
+    .brand-pill{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:var(--orange);color:#fff;border-radius:999px;
+      padding:.35rem .75rem;font-weight:700;letter-spacing:.2px;
+      white-space:nowrap; line-height:1;
+    }
+    .subtitle{font-size:20px;font-weight:800;line-height:1.2}
+    @media (max-width:720px){
+      .header-grid{grid-template-columns:1fr;gap:10px}
+      .logo-right{justify-self:end}
+      .subtitle{font-size:18px}
+      .brand-pill{white-space:normal}
+    }
+
+    /* Toolbar */
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:.75rem .25rem .75rem .25rem;margin-top:10px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .chip{display:inline-block;border:1px solid #e6e6e6;border-radius:12px;padding:.2rem .6rem;background:#fff}
+    .btn{border:1px solid #eee;background:#fff;border-radius:999px;padding:.45rem .95rem;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04);font:inherit}
+    .btn.primary{border-color:var(--orange);background:linear-gradient(180deg,#fff,#fff9f5)}
+    .btn.danger{border-color:#ffd5c0;background:linear-gradient(180deg,#fff,#fff5f0)}
+    .btn:active{transform:translateY(1px)}
+    .input, input[type="text"]{border:1px solid #e6e6e6;border-radius:999px;padding:.45rem .75rem;background:#fff;min-width:220px;font:inherit}
+    input[type="file"]{display:none}
+    .file-label{border:1px dashed #e6e6e6;border-radius:12px;padding:.45rem .75rem;background:#fff;cursor:pointer}
+
+    /* Progress */
+    .progress-outer{background:#efefef;border-radius:12px;height:14px;width:100%;overflow:hidden}
+    .progress-inner{background:var(--orange);height:100%;border-radius:12px;width:0%}
+    .progress-label{font-weight:700;color:#222;margin:0 0 6px}
+
+    /* Sections */
+    .section-card{border:1px solid var(--stroke);border-radius:16px;padding:14px;background:#fff;box-shadow:var(--shadow)}
+    details{border:1px solid var(--stroke);border-radius:14px;background:#fff;margin:12px 0;box-shadow:0 1px 6px rgba(0,0,0,.03)}
+    summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    summary::-webkit-details-marker{display:none}
+    .sum-title{display:flex;align-items:center;gap:8px}
+    .sum-pct{color:#666;font-weight:700}
+    .sec-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;padding:0 14px 14px}
+    @media (max-width:900px){.sec-grid{grid-template-columns:1fr}}
+    .notes{width:100%;min-height:160px;border:1px solid #e6e6e6;border-radius:12px;padding:10px;font:inherit}
+
+    /* Misc */
+    .footer{color:#666;font-size:.9rem;margin-top:24px;text-align:center}
+    .toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;z-index:999}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .checklist-col{display:grid;gap:8px}
+    .check-item{display:flex;align-items:flex-start;gap:10px}
+    .check-item input{transform:translateY(2px)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Header (fixed sizes + fallbacks) -->
+    <div class="header-grid">
+      <div class="logo-left">
+        <img
+          class="logo hmo"
+          src="https://hermosillo.com/wp-content/uploads/2019/07/hermosillo-experience-matters-logo.svg"
+          alt="Hermosillo"
+          decoding="async" loading="eager"
+          onerror="this.src=`data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='40'><text x='0' y='28' font-family='Arial' font-size='24'>Hermosillo</text></svg>`"
+        />
+      </div>
+      <div class="title-stack">
+        <span class="brand-pill">🧩 Core Innovation — Hands-on Homework</span>
+        <div class="subtitle">Goal: Replicate a <b>One-Click ACC Project Setup</b></div>
+      </div>
+      <div class="logo-right">
+        <img
+          class="logo au"
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Autodesk_Logo.svg/2560px-Autodesk_Logo.svg.png"
+          alt="AU 2025"
+          decoding="async" loading="eager"
+          onerror="this.src=`data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='40'><rect width='100%' height='100%' fill='white'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='16' fill='%230F172A'>AU 2025</text></svg>`"
+        />
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="row">
+        <label class="chip"><input id="expandAll" type="checkbox" checked /> Expand all</label>
+        <button class="btn primary" id="markAll">✅ Mark All Done</button>
+        <button class="btn danger" id="resetAll">↩️ Reset All</button>
+      </div>
+      <div class="row">
+        <input id="fileName" type="text" class="input" value="acc_template_checklist_progress.json" />
+        <button class="btn" id="downloadBtn">⬇️ Download Progress</button>
+        <label class="file-label" for="uploadInput">📤 Upload progress (.json)</label>
+        <input id="uploadInput" type="file" accept="application/json" />
+      </div>
+    </div>
+
+    <!-- Top summary -->
+    <h4 class="progress-label">Readiness to Build Template</h4>
+    <div class="progress-outer"><div id="overallBar" class="progress-inner"></div></div>
+    <div style="margin-top:8px"><span id="overallChip" class="chip">Overall: 0%</span></div>
+
+    <!-- Sections -->
+    <div id="sections"></div>
+
+    <div class="footer">Developed by Core Innovation — Grupo Hermosillo · 2025</div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // ---------- Defaults (mirrors your Streamlit DEFAULT_CHECKLIST) ----------
+    const DEFAULT_CHECKLIST = [
+      {
+        title:"1. Analyze Past Projects",
+        items:[
+          "Collect 3–5 recent projects from different teams.",
+          "Document folder structures, permission inconsistencies, and pain points.",
+          "Identify repetitive manual steps (e.g., renaming, duplicating folders)."
+        ]
+      },
+      {
+        title:"2. Define Standards",
+        items:[
+          "Create a standard folder hierarchy (core + discipline folders).",
+          "Agree on naming conventions (files, folders, sheets).",
+          "Define roles and permissions per folder type (PM, Architect, Trade, etc.)."
+        ]
+      },
+      {
+        title:"3. Build Your ACC Template",
+        items:[
+          "In ACC Admin → create a new Project Template.",
+          "Preload folders, subfolders, and role-based permissions.",
+          "Add preconfigured modules: Docs, Design Collaboration, Build, Assets."
+        ]
+      },
+      {
+        title:"4. Automate Workflows",
+        items:[
+          "Configure Model Coordination rules for clash detection on Day 1.",
+          "Add Review Workflows (initiator → approver).",
+          "Create Forms & RFIs templates.",
+          "Set up Assets categories and status sets."
+        ]
+      },
+      {
+        title:"5. Enable Instant Insights",
+        items:[
+          "Build lightweight Dashboards (project KPIs, issue counts, design status).",
+          "Connect dashboards to Insight Builder or APS data for real-time updates."
+        ]
+      },
+      {
+        title:"6. Test & Iterate",
+        items:[
+          "Run a pilot project with the new template.",
+          "Gather feedback from design + field teams.",
+          "Adjust standards until setup is under 2 hours."
+        ]
+      },
+      {
+        title:"7. Scale & Improve",
+        items:[
+          "Train team leads on using the template.",
+          "Document improvements and share learnings.",
+          "Revisit template quarterly to keep it fresh."
+        ]
+      }
+    ];
+
+    // Expand defaults to state with {label, done:false} and notes:""
+    const expandDefaults = () =>
+      DEFAULT_CHECKLIST.map(sec => ({
+        title: sec.title,
+        items: sec.items.map(label => ({ label, done:false })),
+        notes: ""
+      }));
+
+    // ---------- State ----------
+    let checklist = loadFromLocal() ?? expandDefaults();
+
+    // ---------- DOM helpers ----------
+    const $ = sel => document.querySelector(sel);
+    const sectionsEl = $("#sections");
+    const toastEl = $("#toast");
+
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      setTimeout(()=>toastEl.classList.remove("show"), 1400);
+    }
+
+    // ---------- Progress ----------
+    function calcProgress(data){
+      const total = data.reduce((acc,sec)=> acc + sec.items.length, 0);
+      const done  = data.reduce((acc,sec)=> acc + sec.items.filter(i=>i.done).length, 0);
+      const overall = total ? (done/total)*100 : 0;
+      const section = data.map(sec=>{
+        const n = sec.items.length || 0;
+        const d = sec.items.filter(i=>i.done).length;
+        return n ? (d/n)*100 : 0;
+      });
+      return {overall, section};
+    }
+
+    function updateTopSummary(){
+      const prog = calcProgress(checklist);
+      $("#overallBar").style.width = `${Math.round(prog.overall)}%`;
+      $("#overallChip").textContent = `Overall: ${Math.round(prog.overall)}%`;
+      // also update per-section % labels in each summary
+      document.querySelectorAll('[data-sec-index]').forEach(sum=>{
+        const i = +sum.getAttribute('data-sec-index');
+        const pctEl = sum.querySelector('.sum-pct');
+        if (pctEl) pctEl.textContent = `${Math.round(prog.section[i])}%`;
+      });
+      saveToLocal();
+    }
+
+    // ---------- Render ----------
+    function renderSections(){
+      sectionsEl.innerHTML = "";
+      const prog = calcProgress(checklist);
+
+      checklist.forEach((section, idx)=>{
+        // details + summary
+        const details = document.createElement('details');
+        details.className = "section";
+        details.open = $("#expandAll").checked; // respect Expand all toggle
+
+        const summary = document.createElement('summary');
+        summary.setAttribute('data-sec-index', idx);
+        summary.innerHTML = `
+          <span class="sum-title">${section.title}</span>
+          <span class="sum-pct">${Math.round(prog.section[idx])}%</span>
+        `;
+        details.appendChild(summary);
+
+        // grid
+        const grid = document.createElement('div');
+        grid.className = "sec-grid";
+
+        // left: checklist
+        const left = document.createElement('div');
+        left.className = "section-card checklist-col";
+        section.items.forEach((it, j)=>{
+          const wrap = document.createElement('label');
+          wrap.className = "check-item";
+          const id = `sec${idx}_item${j}`;
+          wrap.innerHTML = `
+            <input type="checkbox" id="${id}" ${it.done ? "checked":""} />
+            <span>${it.label}</span>
+          `;
+          left.appendChild(wrap);
+          // bind
+          wrap.querySelector('input').addEventListener('change', (e)=>{
+            checklist[idx].items[j].done = e.target.checked;
+            // update just this section % + top bar
+            const pct = calcProgress(checklist).section[idx];
+            summary.querySelector('.sum-pct').textContent = `${Math.round(pct)}%`;
+            updateTopSummary();
+          });
+        });
+
+        // right: notes
+        const right = document.createElement('div');
+        right.innerHTML = `<strong>Notes</strong>`;
+        const ta = document.createElement('textarea');
+        ta.className = "notes";
+        ta.placeholder = "Observations, links, owner, due date…";
+        ta.value = section.notes || "";
+        ta.addEventListener('input', (e)=>{
+          checklist[idx].notes = e.target.value;
+          saveToLocal();
+        });
+        right.appendChild(ta);
+
+        grid.appendChild(left);
+        grid.appendChild(right);
+
+        const pad = document.createElement('div');
+        pad.style.padding = "0 14px 14px";
+        pad.appendChild(grid);
+
+        details.appendChild(pad);
+        sectionsEl.appendChild(details);
+      });
+
+      updateTopSummary();
+    }
+
+    // ---------- Toolbar actions ----------
+    $("#expandAll").addEventListener('change', (e)=>{
+      document.querySelectorAll('#sections details').forEach(d => d.open = e.target.checked);
+    });
+
+    $("#markAll").addEventListener('click', ()=>{
+      checklist.forEach(sec => sec.items.forEach(it => it.done = true));
+      document.querySelectorAll('#sections input[type="checkbox"]').forEach(cb => { cb.checked = true; });
+      updateTopSummary();
+      toast("All items marked as done. ✅");
+    });
+
+    $("#resetAll").addEventListener('click', ()=>{
+      checklist = expandDefaults();
+      renderSections();
+      toast("Checklist reset. ↩️");
+    });
+
+    $("#downloadBtn").addEventListener('click', ()=>{
+      const name = ($("#fileName").value || "acc_template_checklist_progress.json").trim();
+      const blob = new Blob([JSON.stringify(checklist, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    $("#uploadInput").addEventListener('change', async (e)=>{
+      const file = e.target.files[0];
+      if (!file) return;
+      try{
+        const text = await file.text();
+        const loaded = JSON.parse(text);
+        if (Array.isArray(loaded) && loaded.every(s => s.title && Array.isArray(s.items))){
+          // normalize to {label, done} + notes
+          checklist = loaded.map(sec => ({
+            title: sec.title,
+            items: sec.items.map(it => (typeof it === 'string' ? {label:it, done:false} : {label:it.label, done:!!it.done})),
+            notes: typeof sec.notes === 'string' ? sec.notes : ""
+          }));
+          renderSections();
+          toast("Progress loaded.");
+        }else{
+          toast("Invalid file format.");
+        }
+      }catch(err){
+        toast("Could not load: " + err.message);
+      }finally{
+        e.target.value = ""; // reset input
+      }
+    });
+
+    // ---------- Persistence ----------
+    function saveToLocal(){
+      try{ localStorage.setItem("acc_checklist_v3", JSON.stringify(checklist)); }catch(_){}
+    }
+    function loadFromLocal(){
+      try{
+        const raw = localStorage.getItem("acc_checklist_v3");
+        return raw ? JSON.parse(raw) : null;
+      }catch(_){ return null }
+    }
+
+    // ---------- Init ----------
+    renderSections();
+  </script>
+</body>
+</html>
