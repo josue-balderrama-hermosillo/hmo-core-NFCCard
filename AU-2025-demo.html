@@ -18,66 +18,91 @@
     img{max-width:100%;height:auto;display:block}
     body{
       margin:0; font-family:Inter,Segoe UI,Roboto,system-ui,-apple-system,sans-serif; color:var(--ink);
-      background:
-        radial-gradient(1200px 800px at 10% 0%, rgba(255,106,0,0.07) 0%, transparent 50%) no-repeat,
-        linear-gradient(180deg,#ffffff 0%, #f9f9f9 100%);
+      background: #fff;
     }
-    .wrap{max-width:1200px;margin:0 auto;padding:18px 16px 42px}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 16px 42px}
 
-    /* --- Header layout & image sizing fixes --- */
-    .header-grid{
+    /* ===== HERO with "degradado" ===== */
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:20px 0 24px;
+      border-bottom:1px solid rgba(0,0,0,.04);
+      /* layered degradations */
+      background:
+        /* subtle orange wash from top-left */
+        radial-gradient(1200px 600px at 10% -10%, rgba(255,106,0,0.14) 0%, rgba(255,106,0,0.06) 35%, transparent 60%) no-repeat,
+        /* soft glow from top-right */
+        radial-gradient(800px 420px at 92% -10%, rgba(255,106,0,0.10) 0%, transparent 60%) no-repeat,
+        /* paper fade */
+        linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+    }
+    .hero-grid{
       display:grid;
-      grid-template-columns:auto 1fr auto;
+      grid-template-columns: 220px 1fr 220px;
       align-items:center;
       gap:16px;
-      margin-bottom:8px;
+      max-width:1200px;
+      margin:0 auto;
+      padding:0 16px;
     }
-    .logo-left .logo.hmo{height:40px;width:auto;max-width:220px;object-fit:contain}
-    .logo-right .logo.au{height:36px;width:auto;max-width:180px;object-fit:contain}
-    .title-stack{display:flex;flex-direction:column;gap:6px}
+    .logo-left .logo.hmo{height:64px;width:auto;max-width:220px;object-fit:contain}
+    .logo-right{display:flex;justify-content:flex-end}
+    .logo-right .logo.au{height:64px;width:auto;max-width:240px;object-fit:contain}
+
+    .center-col{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
     .brand-pill{
-      display:inline-flex;align-items:center;gap:.5rem;
-      background:var(--orange);color:#fff;border-radius:999px;
-      padding:.35rem .75rem;font-weight:700;letter-spacing:.2px;
-      white-space:nowrap; line-height:1;
+      display:inline-flex;align-items:center;gap:.55rem;
+      background: var(--orange); color:#fff; border-radius:999px;
+      padding:.45rem 1rem; font-weight:800; letter-spacing:.2px;
+      line-height:1; white-space:nowrap;
+      box-shadow:0 2px 6px rgba(255,106,0,.25);
     }
-    .subtitle{font-size:20px;font-weight:800;line-height:1.2}
-    @media (max-width:720px){
-      .header-grid{grid-template-columns:1fr;gap:10px}
-      .logo-right{justify-self:end}
-      .subtitle{font-size:18px}
-      .brand-pill{white-space:normal}
+    .hero h1{
+      margin:0; 
+      font-size: clamp(26px, 3.4vw, 44px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color:#1f2937;
+      text-wrap: balance;
     }
 
-    /* Toolbar */
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:.75rem .25rem .75rem .25rem;margin-top:10px}
-    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .chip{display:inline-block;border:1px solid #e6e6e6;border-radius:12px;padding:.2rem .6rem;background:#fff}
-    .btn{border:1px solid #eee;background:#fff;border-radius:999px;padding:.45rem .95rem;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04);font:inherit}
+    @media (max-width:900px){
+      .hero-grid{grid-template-columns:1fr; gap:10px; padding:0 12px}
+      .logo-left,.logo-right{justify-self:center}
+      .logo-left .logo.hmo{height:48px}
+      .logo-right .logo.au{height:48px}
+    }
+
+    /* ===== Toolbar ===== */
+    .toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:flex-start;padding:14px 0 10px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #e6e6e6;border-radius:12px;padding:.45rem .7rem;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+    .btn{border:1px solid #eee;background:#fff;border-radius:14px;padding:.6rem 1rem;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04);font:inherit}
     .btn.primary{border-color:var(--orange);background:linear-gradient(180deg,#fff,#fff9f5)}
     .btn.danger{border-color:#ffd5c0;background:linear-gradient(180deg,#fff,#fff5f0)}
     .btn:active{transform:translateY(1px)}
-    .input, input[type="text"]{border:1px solid #e6e6e6;border-radius:999px;padding:.45rem .75rem;background:#fff;min-width:220px;font:inherit}
+    .input, input[type="text"]{border:1px solid #e6e6e6;border-radius:14px;padding:.6rem .8rem;background:#fff;min-width:240px;font:inherit}
     input[type="file"]{display:none}
-    .file-label{border:1px dashed #e6e6e6;border-radius:12px;padding:.45rem .75rem;background:#fff;cursor:pointer}
+    .file-label{border:1px dashed #e6e6e6;border-radius:14px;padding:.6rem .8rem;background:#fff;cursor:pointer}
 
-    /* Progress */
+    /* ===== Progress ===== */
     .progress-outer{background:#efefef;border-radius:12px;height:14px;width:100%;overflow:hidden}
     .progress-inner{background:var(--orange);height:100%;border-radius:12px;width:0%}
-    .progress-label{font-weight:700;color:#222;margin:0 0 6px}
+    .progress-label{font-weight:800;color:#222;margin:6px 0}
 
-    /* Sections */
+    /* ===== Sections ===== */
     .section-card{border:1px solid var(--stroke);border-radius:16px;padding:14px;background:#fff;box-shadow:var(--shadow)}
     details{border:1px solid var(--stroke);border-radius:14px;background:#fff;margin:12px 0;box-shadow:0 1px 6px rgba(0,0,0,.03)}
-    summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:12px}
     summary::-webkit-details-marker{display:none}
     .sum-title{display:flex;align-items:center;gap:8px}
-    .sum-pct{color:#666;font-weight:700}
+    .sum-pct{color:#666;font-weight:800}
     .sec-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;padding:0 14px 14px}
     @media (max-width:900px){.sec-grid{grid-template-columns:1fr}}
     .notes{width:100%;min-height:160px;border:1px solid #e6e6e6;border-radius:12px;padding:10px;font:inherit}
 
-    /* Misc */
+    /* ===== Misc ===== */
     .footer{color:#666;font-size:.9rem;margin-top:24px;text-align:center}
     .toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;z-index:999}
     .toast.show{opacity:1;transform:translateY(0)}
@@ -87,33 +112,37 @@
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- Header (fixed sizes + fallbacks) -->
-    <div class="header-grid">
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-grid">
       <div class="logo-left">
         <img
           class="logo hmo"
           src="https://hermosillo.com/wp-content/uploads/2019/07/hermosillo-experience-matters-logo.svg"
-          alt="Hermosillo"
+          alt="Hermosillo — Experience Matters"
           decoding="async" loading="eager"
-          onerror="this.src=`data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='40'><text x='0' y='28' font-family='Arial' font-size='24'>Hermosillo</text></svg>`"
+          onerror="this.src=`data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='64'><text x='0' y='44' font-family='Arial' font-size='28'>Hermosillo</text></svg>`"
         />
       </div>
-      <div class="title-stack">
+
+      <div class="center-col">
         <span class="brand-pill">🧩 Core Innovation — Hands-on Homework</span>
-        <div class="subtitle">Goal: Replicate a <b>One-Click ACC Project Setup</b></div>
+        <h1>Goal: Replicate a One-Click ACC Project Setup</h1>
       </div>
+
       <div class="logo-right">
         <img
           class="logo au"
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Autodesk_Logo.svg/2560px-Autodesk_Logo.svg.png"
-          alt="AU 2025"
+          src="https://through-the-interface.typepad.com/.a/6a00d83452464869e202942f9c0b09200c-pi"
+          alt="Autodesk / AU"
           decoding="async" loading="eager"
-          onerror="this.src=`data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='40'><rect width='100%' height='100%' fill='white'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='16' fill='%230F172A'>AU 2025</text></svg>`"
+          onerror="this.src=`data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='64'><rect width='100%' height='100%' fill='white'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='18' fill='%230F172A'>AU 2025</text></svg>`"
         />
       </div>
     </div>
+  </header>
 
+  <div class="wrap">
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="row">
