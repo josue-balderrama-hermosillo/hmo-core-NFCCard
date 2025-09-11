@@ -65,10 +65,10 @@
     .preview-blocked{position:absolute; inset:0; display:none; place-items:center; text-align:center; background:rgba(248,250,252,.9); color:#334155; padding:1rem;}
     .preview-wrap.is-blocked .preview-blocked{display:grid;}
 
-    /* NEW: scaled “full page” mode inside the card */
+    /* Helper for scaled placement */
     .preview-iframe.fit-contain{
-      right:auto; bottom:auto;             /* override inset:0 from base rule */
-      transform-origin: 0 0;               /* scale from top-left corner */
+      right:auto; bottom:auto;
+      transform-origin: 0 0;
     }
 
     /* ---- FLIP Expander ---- */
@@ -177,11 +177,11 @@
       setVar('--brand-gray', t.colors.gray);
       setVar('--mark-bg', t.markBg);
 
-      // Browser UI top bar color (Android Chrome, some PWAs)
+      // Browser UI top bar color
       const themeMeta = document.querySelector('meta[name="theme-color"]');
       if (themeMeta) themeMeta.setAttribute('content', t.colors.orange);
 
-      // Optional: Windows tile color
+      // Windows tile color
       const tileMeta = document.querySelector('meta[name="msapplication-TileColor"]');
       if (tileMeta) tileMeta.setAttribute('content', t.colors.orange);
       
@@ -360,7 +360,7 @@
           <div class="preview-wrap aspect-video bg-slate-100">
             <iframe class="preview-iframe cardPreview"
                     data-src="./AU-2025-demo.html?embed=1"
-                    data-fit="contain"
+                    data-fit="width" data-max-scale="1.15"
                     title="ACC Setup Preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                     sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
             <div class="preview-hint hidden sm:block">Click to interact</div>
@@ -381,7 +381,7 @@
           <div class="preview-wrap aspect-video bg-slate-100">
             <iframe class="preview-iframe cardPreview"
                     data-src="./parametric-budget-demo.html?embed=1"
-                    data-fit="contain"
+                    data-fit="width" data-max-scale="1.15"
                     title="Parametric Budgeting Preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                     sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
             <div class="preview-hint hidden sm:block">Click to interact</div>
@@ -402,7 +402,7 @@
           <div class="preview-wrap aspect-video bg-slate-100">
             <iframe class="preview-iframe cardPreview"
                     data-src="./industrial-park-demo.html?embed=1"
-                    data-fit="contain"
+                    data-fit="width" data-max-scale="1.15"
                     title="Industrial Park Preview" loading="lazy"
                     sandbox="allow-scripts allow-same-origin"
                     referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -581,39 +581,58 @@
     syncContacts(); const _applyThemeOrig = applyTheme; applyTheme = function(key){ _applyThemeOrig(key); syncContacts(); };
 
     /* ==========================================================
-       LAZY-LOAD + FULL-PAGE PREVIEW SCALER FOR SAME-ORIGIN IFRAMES
+       LAZY-LOAD + FULL-WIDTH/CONTAIN PREVIEW SCALER (same-origin)
        ========================================================== */
-    function fitIframeContain(ifr){
+    function fitIframe(ifr){
       const wrap = ifr.closest('.preview-wrap');
       if(!wrap) return;
+
       try{
         const doc  = ifr.contentDocument || ifr.contentWindow.document;
         const root = doc.documentElement;
         const body = doc.body;
 
-        // In-iframe page dimensions
+        // Size of the page inside iframe
         const pageW = Math.max(root.scrollWidth,  body ? body.scrollWidth  : 0, ifr.contentWindow.innerWidth);
         const pageH = Math.max(root.scrollHeight, body ? body.scrollHeight : 0, ifr.contentWindow.innerHeight);
 
-        // Container dimensions
+        // Size of preview box
         const wrapW = wrap.clientWidth;
         const wrapH = wrap.clientHeight;
 
-        const scale = Math.min(wrapW / pageW, wrapH / pageH);
+        const mode = (ifr.dataset.fit || 'contain').toLowerCase();
+        let scale;
 
-        // Prepare and scale
+        if (mode === 'width') {
+          // Fill the width; cap enlargement
+          const maxScale = parseFloat(ifr.dataset.maxScale || '1.15');
+          scale = wrapW / pageW;
+          if (isFinite(maxScale)) scale = Math.min(scale, maxScale);
+        } else {
+          // Fit whole page in box
+          scale = Math.min(wrapW / pageW, wrapH / pageH);
+        }
+
+        // Prep and place
         ifr.classList.add('fit-contain');
-        ifr.style.left = '0';
-        ifr.style.top  = '0';
+        ifr.style.left   = '0';
+        ifr.style.top    = '0';
         ifr.style.width  = pageW + 'px';
         ifr.style.height = pageH + 'px';
 
-        // Center inside the preview box
-        const offX = (wrapW - pageW * scale) / 2;
-        const offY = (wrapH - pageH * scale) / 2;
+        // Offsets
+        let offX, offY;
+        if (mode === 'width') {
+          offX = Math.max((wrapW - pageW * scale) / 2, 0); // center horizontally if capped smaller
+          offY = 0;                                        // show top of page
+        } else {
+          offX = (wrapW - pageW * scale) / 2;
+          offY = (wrapH - pageH * scale) / 2;
+        }
+
         ifr.style.transform = `translate(${offX}px, ${offY}px) scale(${scale})`;
       }catch(e){
-        // Cross-origin: ignore (e.g., Looker Studio)
+        // Cross-origin (e.g., Looker Studio) — ignore
       }
     }
 
@@ -631,14 +650,12 @@
           ifr.addEventListener('load', () => {
             clearTimeout(timer);
 
-            // If requested and same-origin, scale to show full page
-            if (ifr.dataset.fit === 'contain') {
-              fitIframeContain(ifr);
-
-              // Refit on preview-box resize + window resize
-              const ro = new ResizeObserver(() => fitIframeContain(ifr));
+            if (ifr.dataset.fit) {
+              fitIframe(ifr);
+              // Refit on preview resize + window resize
+              const ro = new ResizeObserver(() => fitIframe(ifr));
               ro.observe(wrap);
-              window.addEventListener('resize', () => fitIframeContain(ifr));
+              window.addEventListener('resize', () => fitIframe(ifr));
             }
           }, { once:true });
         }
@@ -647,11 +664,11 @@
     }, { rootMargin: '200px' });
     previewIframes.forEach(ifr => io.observe(ifr));
 
-    // Prevent card <a> clicks from hijacking the card click
+    // Links inside cards shouldn't block the card click
     document.querySelectorAll('#showcase article a').forEach(a => a.addEventListener('click', e => e.stopPropagation()));
 
     /* -----------------------------
-       FLIP open from card (unchanged)
+       FLIP open from card
        ----------------------------- */
     function cleanOpenUrl(url) {
       try {
