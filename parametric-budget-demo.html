@@ -1,677 +1,554 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Core Innovation • Parametric Budget (Sim)</title>
-  <meta name="description" content="Hermosillo — Parametric Budget Simulator (Pure HTML/JS)" />
-  <link rel="preconnect" href="https://cdn.plot.ly" crossorigin>
-  <style>
-    :root{
-      --brand-orange:#FF6A00;
-      --paper:#FFFFFF;
-      --surface:#F6F7FA;
-      --stroke:#E5E7EB;
-      --ink:#0F172A;
-      --ink-soft:#334155;
-      --shadow:0 8px 24px rgba(2,6,23,0.08);
-      --band-bg:#F3F4F6;
-      --radius-xl:20px;
-      --radius-2xl:26px;
-    }
-    body.dark{
-      --paper:#0B1220;
-      --surface:#111827;
-      --stroke:#1F2937;
-      --ink:#F8FAFC;
-      --ink-soft:#CBD5E1;
-      --shadow:0 8px 24px rgba(0,0,0,0.35);
-      --band-bg:#0F172A;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Segoe UI,Roboto,Arial,system-ui,sans-serif}
-    .wrap{max-width:1400px;margin:0 auto;padding:1.2rem 1.2rem 2.5rem}
-    .top-banner{
-      display:flex;align-items:center;gap:14px;background:var(--surface);
-      border:1px solid var(--stroke);border-radius:var(--radius-2xl);
-      padding:10px 14px;box-shadow:var(--shadow)
-    }
-    .top-banner img{height:28px;object-fit:contain}
-    .title{font-weight:700;font-size:1.1rem;color:var(--ink)}
-    .subtitle{font-size:.9rem;color:var(--ink-soft)}
-    .control-band-spacer{margin:14px -1.2rem -6px;height:36px;background:var(--band-bg);border-bottom:1px solid var(--stroke)}
-    .card{
-      border:1px solid var(--stroke);background:var(--surface);border-radius:var(--radius-2xl);
-      box-shadow:var(--shadow);padding:12px;margin-top:12px
-    }
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:10px}
-    @media (max-width:1024px){.grid{grid-template-columns:1fr}}
-    h4{margin:0 0 8px}
-    .row{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1.2fr;gap:12px}
-    .row > div{display:flex;flex-direction:column;gap:8px}
-    .btn,button,input,select{font:inherit}
-    .btn{
-      border:1px solid var(--stroke);background:var(--paper);color:var(--ink);
-      padding:10px 12px;border-radius:12px;cursor:pointer
-    }
-    .btn.primary{background:var(--brand-orange);color:white;border-color:transparent}
-    .btn.full{width:100%}
-    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-    label{font-size:.9rem;color:var(--ink-soft)}
-    input[type="range"]{width:100%}
-    .switch{display:flex;align-items:center;gap:8px}
-    .pill{
-      display:inline-block;padding:6px 12px;border-radius:999px;border:1px solid var(--stroke);
-      background:var(--paper);color:var(--ink-soft);font-size:.85rem;margin:4px 6px 0 0
-    }
-    .pill.orange{border-color:var(--brand-orange);background:rgba(255,106,0,.08);color:var(--brand-orange)}
-    .phone-sizer{max-width:420px;margin:0 auto;border-radius:36px}
-    .phone-notch{height:24px;background:linear-gradient(0deg,rgba(0,0,0,0.08),rgba(0,0,0,0.12));
-      border-top-left-radius:36px;border-top-right-radius:36px;margin:-12px -12px 6px -12px}
-    .metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-    @media (max-width:1200px){.metrics{grid-template-columns:repeat(2,1fr)}}
-    .metric{
-      background:var(--paper);border:1px solid var(--stroke);border-radius:16px;padding:12px;text-align:center
-    }
-    .metric .k{font-weight:700;font-size:1.15rem}
-    .toast{
-      position:fixed;right:16px;bottom:16px;background:var(--ink);color:var(--paper);
-      padding:10px 14px;border-radius:12px;opacity:0;transform:translateY(8px);
-      transition:.25s;pointer-events:none;z-index:999
-    }
-    .toast.show{opacity:1;transform:translateY(0)}
-    .share-url{word-break:break-all}
-    .footer{opacity:.65;font-size:.8rem;margin-top:24px}
-  </style>
-  <!-- Plotly and QRCode -->
-  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Core Innovation • Parametric Budget (Sim)</title>
+<meta name="description" content="Hermosillo — Parametric Budget Simulator (Responsive HTML/JS)" />
+<link rel="preconnect" href="https://cdn.plot.ly" crossorigin>
+<style>
+  :root{
+    --orange:#FF6A00;
+    --paper:#ffffff;
+    --surface:#ffffffE6; /* glass */
+    --stroke:#E7EAF0;
+    --ink:#0F172A;
+    --ink-soft:#475569;
+    --shadow:0 12px 30px rgba(15,23,42,.08);
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --paper:#0B1220; --surface:#0F172ACC; --stroke:#1E293B; --ink:#F8FAFC; --ink-soft:#9CA3AF; --shadow:0 12px 30px rgba(0,0,0,.35);}
+  }
+  body.dark{
+    --paper:#0B1220; --surface:#0F172ACC; --stroke:#1E293B; --ink:#F8FAFC; --ink-soft:#9CA3AF; --shadow:0 12px 30px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.4 Inter, Segoe UI, Roboto, system-ui, -apple-system, Arial, sans-serif;}
+
+  /* Hero */
+  .hero{
+    position:relative; overflow:hidden;
+    background:
+      radial-gradient(1200px 680px at 6% -10%, rgba(255,106,0,.18) 0%, rgba(255,106,0,.08) 40%, transparent 60%) no-repeat,
+      radial-gradient(900px 520px at 96% -10%, rgba(255,106,0,.12) 0%, transparent 60%) no-repeat,
+      linear-gradient(180deg, #fff 0%, #FAFBFD 100%);
+  }
+  body.dark .hero{
+    background:
+      radial-gradient(1200px 680px at 6% -10%, rgba(255,106,0,.22) 0%, rgba(255,106,0,.10) 40%, transparent 60%) no-repeat,
+      radial-gradient(900px 520px at 96% -10%, rgba(255,106,0,.14) 0%, transparent 60%) no-repeat,
+      linear-gradient(180deg, #0b1220 0%, #0b1220 100%);
+  }
+  .hero-inner{max-width:1200px;margin:0 auto;padding:18px 16px 22px;display:grid;grid-template-columns:180px 1fr 180px;gap:14px;align-items:center}
+  .brand-left{display:flex;align-items:center}
+  .brand-left img{height:48px;object-fit:contain}
+  .brand-center{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+  .pill{display:inline-flex;align-items:center;gap:.55rem;background:var(--orange);color:#fff;border-radius:999px;padding:.45rem 1rem;font-weight:800;letter-spacing:.2px;line-height:1;box-shadow:0 2px 6px rgba(255,106,0,.25)}
+  .title{margin:0;font-weight:900;letter-spacing:-.02em;font-size:clamp(24px,3.4vw,40px);text-wrap:balance}
+  .brand-right{display:flex;justify-content:flex-end}
+  .brand-right img{height:48px;object-fit:contain}
+
+  @media (max-width:960px){
+    .hero-inner{grid-template-columns:1fr;gap:10px}
+    .brand-left,.brand-right{justify-content:center}
+  }
+
+  /* Top toolbar / presets */
+  .wrap{max-width:1200px;margin:0 auto;padding:14px 16px 28px}
+  .toolbar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:8px 0 6px;
+  }
+  .left-tools, .right-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--stroke);background:var(--paper);
+    border-radius:999px;padding:.45rem .7rem;box-shadow:0 1px 2px rgba(2,6,23,.05);
+    white-space:nowrap; line-height:1;
+  }
+  .chip--pill{ border-color: var(--orange); } /* orange accent */
+  .btn{border:1px solid var(--stroke);background:linear-gradient(180deg,#fff,#fff9f5);border-radius:999px;padding:.5rem .9rem;cursor:pointer;box-shadow:0 1px 3px rgba(2,6,23,.06);font:inherit}
+  .btn.ghost{background:var(--paper)}
+  .toggle{display:flex;align-items:center;gap:8px}
+
+  /* Layout: desktop = 2 columns; mobile = tabbed single column */
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:12px}
+  @media (max-width:1024px){ .layout{grid-template-columns:1fr} }
+
+  .card{
+    border:1px solid var(--stroke);background:var(--surface);backdrop-filter:saturate(140%) blur(8px);
+    border-radius:24px; padding:14px; box-shadow:var(--shadow);
+    overflow: hidden; /* <- guard rounded corners */
+  }
+  h4{margin:0 0 10px 2px;font-size:18px}
+
+  /* Simulation form */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media (max-width:560px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+  label{font-size:.9rem;color:var(--ink-soft);display:block;margin:2px 0 6px}
+  select, input[type="range"], input[type="text"]{
+    width:100%;border:1px solid var(--stroke);background:var(--paper);color:var(--ink);
+    border-radius:12px;padding:.55rem .6rem;font:inherit;
+  }
+  .checkrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  @media (max-width:720px){ .checkrow{grid-template-columns:1fr 1fr} }
+  .check{display:flex;align-items:center;gap:8px;border:1px solid var(--stroke);background:var(--paper);border-radius:12px;padding:.5rem .6rem}
+
+  /* KPI cards */
+  .kpi-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  @media (max-width:1200px){ .kpi-row{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:720px){ .kpi-row{grid-template-columns:repeat(2,1fr)} }
+  .kpi{background:var(--paper);border:1px solid var(--stroke);border-radius:16px;padding:12px;text-align:center}
+  .kpi .lbl{opacity:.75;font-size:.88rem}
+  .kpi .val{font-weight:900;font-size:1.15rem;margin-top:4px}
+
+  /* Charts */
+  .chart{width:100%;height:320px}
+  @media (max-width:720px){ .chart{height:260px} }
+
+  /* Scenario pills layout (prevents inner line breaks) */
+  #scenarioPills{
+    display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:6px;
+  }
+  #scenarioPills b{font-weight:800}
+
+  /* Mobile tabbar */
+  .tabbar{display:none;position:sticky;top:0;z-index:50;padding:6px 0;background:var(--paper);border-bottom:1px solid var(--stroke)}
+  .tabs{display:flex;gap:8px;justify-content:center}
+  .tab{border:1px solid var(--stroke);background:var(--paper);border-radius:999px;padding:.45rem .9rem;cursor:pointer}
+  .tab.active{background:var(--orange);color:#fff;border-color:transparent}
+  @media (max-width:1024px){ .tabbar{display:block} }
+
+  /* Sticky action bar (mobile) */
+  .actionbar{display:none;position:sticky;bottom:0;z-index:60;padding:8px 12px}
+  .actionbar .inner{max-width:1200px;margin:0 auto;background:var(--surface);backdrop-filter:blur(8px);
+    border:1px solid var(--stroke);border-radius:999px;box-shadow:var(--shadow);display:flex;gap:8px;padding:8px}
+  .actionbar .inner .btn{flex:1}
+  @media (max-width:1024px){ .actionbar{display:block} }
+
+  /* Toast */
+  .toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;z-index:999}
+  .toast.show{opacity:1;transform:translateY(0)}
+</style>
+<!-- Plotly + QR -->
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="brand-left">
+        <img src="https://hermosillo.com/wp-content/uploads/2019/07/hermosillo-experience-matters-logo.svg"
+             alt="Hermosillo" onerror="this.style.opacity=.0" />
+      </div>
+      <div class="brand-center">
+        <span class="pill">⚙️ Core Innovation — Parametric Budget (Sim)</span>
+        <h1 class="title">Estimate smarter. Explain faster.</h1>
+      </div>
+      <div class="brand-right">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Autodesk_Logo.svg/512px-Autodesk_Logo.svg.png"
+             alt="Autodesk" onerror="this.style.opacity=.0" />
+      </div>
+    </div>
+  </header>
+
   <div class="wrap">
-    <!-- Banner -->
-    <div class="top-banner">
-      <img src="https://hermosillo.com/wp-content/uploads/2019/08/horizontal-hermosillo-experience-matters-registered-logo.png" alt="Hermosillo Logo">
-      <div>
-        <div class="title">Core Innovation • Parametric Budget (Sim)</div>
-        <div class="subtitle">Hermosillo — Experience Matters</div>
+    <!-- tools -->
+    <div class="toolbar">
+      <div class="left-tools">
+        <button class="btn ghost" id="preset1">Preset: Basic Whse 10k m²</button>
+        <button class="btn ghost" id="preset2">Preset: Premium Office 5k m²</button>
+        <button class="btn ghost" id="preset3">Preset: Retail Std 3k m²</button>
+        <button class="btn" id="reset">Reset</button>
+      </div>
+      <div class="right-tools">
+        <div class="toggle">
+          <input type="checkbox" id="darkToggle">
+          <label for="darkToggle">Dark mode</label>
+        </div>
+        <span class="chip" id="projectChip">Project: North Hub DC</span>
       </div>
     </div>
 
-    <!-- Control band -->
-    <div class="control-band-spacer"></div>
-    <div class="card">
-      <div class="row">
-        <div>
-          <label for="project">Project</label>
-          <select id="project">
-            <option>North Hub DC</option>
-            <option>MX HQ Office</option>
-            <option>Sunset Retail Plaza</option>
-          </select>
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <button class="btn full" id="preset1">Preset: Basic Whse 10k m²</button>
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <button class="btn full" id="preset2">Preset: Premium Office 5k m²</button>
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <button class="btn full" id="preset3">Preset: Retail Std 3k m²</button>
-        </div>
-        <div class="split">
-          <button class="btn" id="reset">Reset simulation</button>
-          <label class="switch">
-            <input type="checkbox" id="darkToggle">
-            <span>Dark mode</span>
-          </label>
-        </div>
+    <!-- mobile tabs -->
+    <div class="tabbar">
+      <div class="tabs">
+        <button class="tab active" data-tab="sim">Simulate</button>
+        <button class="tab" data-tab="dash">Dashboard</button>
       </div>
     </div>
 
-    <!-- Two columns -->
-    <div class="grid">
-      <!-- LEFT: Phone panel -->
-      <div>
-        <h4>Phone (Simulation)</h4>
-        <div class="card phone-sizer">
-          <div class="phone-notch"></div>
-          <form id="simForm">
-            <label>Parametric Budget Checklist</label>
-
-            <div class="split">
-              <div>
-                <label>Project Type</label>
-                <select id="project_type">
-                  <option>Warehouse</option>
-                  <option>Office</option>
-                  <option>Retail</option>
-                </select>
-              </div>
-              <div>
-                <label>Structural System</label>
-                <div class="split">
-                  <label class="switch"><input type="radio" name="structure" value="Steel" checked> Steel</label>
-                  <label class="switch"><input type="radio" name="structure" value="Concrete"> Concrete</label>
-                </div>
-              </div>
+    <!-- main layout -->
+    <div class="layout">
+      <!-- SIMULATE -->
+      <section id="simPane">
+        <div class="card">
+          <h4>Phone (Simulation)</h4>
+          <div class="grid-2">
+            <div>
+              <label for="project">Project</label>
+              <select id="project">
+                <option>North Hub DC</option>
+                <option>MX HQ Office</option>
+                <option>Sunset Retail Plaza</option>
+              </select>
             </div>
-
-            <div style="margin-top:10px">
-              <label>Built Area (m²): <span id="areaOut">10000</span></label>
-              <input type="range" id="area" min="500" max="50000" step="500" value="10000" />
+            <div>
+              <label for="area">Built Area (m²): <b id="areaOut">10000</b></label>
+              <input type="range" id="area" min="500" max="50000" step="500" value="10000"/>
             </div>
+          </div>
 
-            <div class="three" style="margin-top:10px">
-              <div>
-                <label>Envelope</label>
-                <select id="envelope">
-                  <option>Standard</option>
-                  <option>Insulated</option>
-                </select>
-              </div>
-              <div>
-                <label>Quality Level</label>
-                <select id="quality">
-                  <option>Basic</option>
-                  <option selected>Standard</option>
-                  <option>Premium</option>
-                </select>
-              </div>
-              <div>
-                <label>Region (Cost Index)</label>
-                <select id="region">
-                  <option>North</option>
-                  <option>Central</option>
-                  <option>South</option>
-                </select>
+          <div class="grid-2" style="margin-top:10px">
+            <div>
+              <label>Project Type</label>
+              <select id="project_type">
+                <option>Warehouse</option>
+                <option>Office</option>
+                <option>Retail</option>
+              </select>
+            </div>
+            <div>
+              <label>Structural System</label>
+              <div class="grid-2">
+                <label class="check"><input type="radio" name="structure" value="Steel" checked> Steel</label>
+                <label class="check"><input type="radio" name="structure" value="Concrete"> Concrete</label>
               </div>
             </div>
+          </div>
 
-            <hr style="border:none;border-top:1px solid var(--stroke);margin:12px 0" />
-            <label>Options</label>
-            <div class="three">
-              <label class="switch"><input type="checkbox" id="opt_skylights" checked> Skylights</label>
-              <label class="switch"><input type="checkbox" id="opt_mezzanine"> Mezzanine</label>
-              <label class="switch"><input type="checkbox" id="opt_hvac" checked> HVAC</label>
+          <div class="grid-3" style="margin-top:10px">
+            <div>
+              <label>Envelope</label>
+              <select id="envelope"><option>Standard</option><option>Insulated</option></select>
             </div>
-
-            <hr style="border:none;border-top:1px solid var(--stroke);margin:12px 0" />
-            <label>Parametric Checklist (affects contingency)</label>
-            <div id="checklistBox" class="split"></div>
-
-            <hr style="border:none;border-top:1px solid var(--stroke);margin:12px 0" />
-            <div class="split">
-              <button type="button" class="btn primary" id="sendBtn">Send to Dashboard</button>
-              <button type="button" class="btn" id="shareBtn">Create Share Link (fake) 🔗</button>
+            <div>
+              <label>Quality</label>
+              <select id="quality"><option>Basic</option><option selected>Standard</option><option>Premium</option></select>
             </div>
-          </form>
+            <div>
+              <label>Region (Cost Index)</label>
+              <select id="region"><option>North</option><option>Central</option><option>South</option></select>
+            </div>
+          </div>
+
+          <div style="margin:12px 0 6px;border-top:1px dashed var(--stroke)"></div>
+
+          <label>Options</label>
+          <div class="checkrow">
+            <label class="check"><input type="checkbox" id="opt_skylights" checked> Skylights</label>
+            <label class="check"><input type="checkbox" id="opt_mezzanine"> Mezzanine</label>
+            <label class="check"><input type="checkbox" id="opt_hvac" checked> HVAC</label>
+          </div>
+
+          <div style="margin:12px 0 6px;border-top:1px dashed var(--stroke)"></div>
+
+          <label>Parametric Checklist (affects contingency)</label>
+          <div id="checklistBox" class="grid-2"></div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <button type="button" class="btn" id="sendBtn">Send to Dashboard</button>
+            <button type="button" class="btn ghost" id="shareBtn">Create Share Link (fake) 🔗</button>
+          </div>
         </div>
 
-        <div class="card" id="shareCard" style="display:none">
-          <h5 style="margin:0 0 8px">Share (Demo)</h5>
-          <div class="share-url" id="shareUrl"></div>
+        <div class="card" id="shareCard" style="display:none;margin-top:12px">
+          <h4>Share (Demo)</h4>
+          <div id="shareUrl" style="word-break:break-all"></div>
           <div id="qr" style="margin-top:8px"></div>
         </div>
-      </div>
+      </section>
 
-      <!-- RIGHT: Dashboard -->
-      <div>
-        <h4>Dashboard</h4>
+      <!-- DASHBOARD -->
+      <section id="dashPane">
         <div class="card" id="waitingCard">
-          <h5 style="margin:0 0 6px">Waiting for scenario</h5>
-          <p>Use the <b>Phone</b> on the left and press <b>Send to Dashboard</b> to simulate results.</p>
+          <h4>Waiting for scenario</h4>
+          <p>Use the <b>Simulate</b> tab and press <b>Send to Dashboard</b>.</p>
         </div>
 
         <div id="dash" style="display:none">
-          <!-- Scenario Summary -->
           <div class="card">
-            <h5 style="margin:0 0 6px">Scenario Summary</h5>
+            <h4>Scenario Summary</h4>
             <div id="scenarioSummary"></div>
-            <div id="scenarioPills" style="margin-top:6px"></div>
+            <div id="scenarioPills"></div>
           </div>
 
-          <!-- 3D Model Preview -->
-          <div class="card">
-            <h5 style="margin:0 0 6px">3D Model Preview</h5>
-            <div id="chart3d" style="width:100%;height:360px"></div>
+          <div class="card" style="margin-top:12px">
+            <h4>3D Model Preview</h4>
+            <div id="chart3d" class="chart"></div>
           </div>
 
-          <!-- KPIs -->
-          <div class="card">
-            <h5 style="margin:0 0 6px">Cost & KPIs</h5>
-            <div class="metrics" id="kpiBox"></div>
+          <div class="card" style="margin-top:12px">
+            <h4>Cost & KPIs</h4>
+            <div class="kpi-row" id="kpiBox"></div>
           </div>
 
-          <!-- Analytics -->
-          <div class="card">
-            <h5 style="margin:0 0 6px">Analytics</h5>
-            <div class="split">
-              <div>
-                <label>Cost Distribution</label>
-                <div id="donut" style="width:100%;height:300px"></div>
-              </div>
-              <div>
-                <label>Quantities</label>
-                <div id="bar" style="width:100%;height:300px"></div>
-              </div>
+          <div class="card" style="margin-top:12px">
+            <h4>Analytics</h4>
+            <div class="grid-2">
+              <div><div id="donut" class="chart"></div></div>
+              <div><div id="bar" class="chart"></div></div>
             </div>
-            <label style="display:block;margin-top:12px">Cost vs. Quality Level</label>
-            <div id="line" style="width:100%;height:300px"></div>
+            <div style="height:8px"></div>
+            <div id="line" class="chart"></div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      This is a local simulation. No external services. Replace cost/3D with real engines later. <!-- [INTEGRATION POINT] -->
+      </section>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <!-- sticky action bar (mobile) -->
+  <div class="actionbar">
+    <div class="inner">
+      <button class="btn" id="sendBtnSticky">Send to Dashboard</button>
+      <button class="btn ghost" id="shareBtnSticky">Share Link</button>
+    </div>
+  </div>
 
-  <script>
-    // -------------------------------
-    // State & Defaults
-    // -------------------------------
-    const defaultChecklist = {
-      "Soil report available": true,
-      "As-built utilities verified": true,
-      "Permitting path confirmed": false,
-      "Vendor pre-qualification complete": true,
-      "BIM execution plan approved": false,
-      "LEED considerations": true,
-      "Early procurement planned": false,
+  <div id="toast" class="toast"></div>
+
+<script>
+  // ---------- State ----------
+  const defaultChecklist = {
+    "Soil report available": true,
+    "As-built utilities verified": true,
+    "Permitting path confirmed": false,
+    "Vendor pre-qualification complete": true,
+    "BIM execution plan approved": false,
+    "LEED considerations": true,
+    "Early procurement planned": false,
+  };
+  const state = {
+    dark:false, sent:false, lastSent:null, fakeUrl:null,
+    project:"North Hub DC", project_type:"Warehouse", built_area:10000,
+    structural_system:"Steel", envelope:"Standard", quality:"Standard",
+    region:"North", opt_skylights:true, opt_mezzanine:false, opt_hvac:true,
+    checklist:{...defaultChecklist},
+  };
+
+  // ---------- Helpers ----------
+  const $ = s => document.querySelector(s);
+  const fmt = (n,opts={}) => Number(n).toLocaleString(undefined,opts);
+  function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1400); }
+  function activateTab(id){
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+    $("#simPane").style.display = id==="sim" ? "" : "none";
+    $("#dashPane").style.display = id==="dash" ? "" : "";
+    if(id==="dash") document.getElementById("dashPane").scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
+  // ---------- UI bindings ----------
+  // tabs (mobile)
+  document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>activateTab(btn.dataset.tab)));
+
+  // area live output
+  const areaInput=$("#area"), areaOut=$("#areaOut");
+  areaInput.addEventListener("input", ()=> areaOut.textContent = areaInput.value);
+
+  // checklist render
+  function renderChecklist(){
+    const box=$("#checklistBox"); box.innerHTML="";
+    Object.entries(state.checklist).forEach(([k,v],i)=>{
+      const id="chk_"+i;
+      const el=document.createElement("label");
+      el.className="check";
+      el.innerHTML=`<input type="checkbox" id="${id}" ${v?"checked":""}> ${k}`;
+      el.querySelector("input").addEventListener("change",ev=> state.checklist[k]=ev.target.checked);
+      box.appendChild(el);
+    });
+  }
+  renderChecklist();
+
+  // select + inputs sync
+  $("#project").addEventListener("change", e=>{ state.project=e.target.value; $("#projectChip").textContent="Project: "+state.project; });
+  $("#project_type").addEventListener("change", e=> state.project_type=e.target.value);
+  $("#envelope").addEventListener("change", e=> state.envelope=e.target.value);
+  $("#quality").addEventListener("change", e=> state.quality=e.target.value);
+  $("#region").addEventListener("change", e=> state.region=e.target.value);
+  document.querySelectorAll('input[name="structure"]').forEach(r=>r.addEventListener("change", e=> state.structural_system=e.target.value));
+  $("#opt_skylights").addEventListener("change", e=> state.opt_skylights=e.target.checked);
+  $("#opt_mezzanine").addEventListener("change", e=> state.opt_mezzanine=e.target.checked);
+  $("#opt_hvac").addEventListener("change", e=> state.opt_hvac=e.target.checked);
+  areaInput.addEventListener("change", ()=> state.built_area=parseInt(areaInput.value,10));
+
+  // presets
+  $("#preset1").addEventListener("click", ()=> setPreset("Warehouse",10000,"Steel","Standard","Basic","North",true,false,true));
+  $("#preset2").addEventListener("click", ()=> setPreset("Office",5000,"Concrete","Insulated","Premium","Central",false,true,true));
+  $("#preset3").addEventListener("click", ()=> setPreset("Retail",3000,"Steel","Standard","Standard","South",true,false,true));
+  function setPreset(pType, area, struct, env, qual, region, skyl, mezz, hvac){
+    $("#project_type").value = state.project_type = pType;
+    areaInput.value = state.built_area = area; areaOut.textContent = area;
+    document.querySelector(`input[name="structure"][value="${struct}"]`).checked = true;
+    state.structural_system = struct;
+    $("#envelope").value = state.envelope = env;
+    $("#quality").value = state.quality = qual;
+    $("#region").value = state.region = region;
+    $("#opt_skylights").checked = state.opt_skylights = skyl;
+    $("#opt_mezzanine").checked = state.opt_mezzanine = mezz;
+    $("#opt_hvac").checked = state.opt_hvac = hvac;
+    toast("Preset loaded");
+  }
+
+  // reset
+  $("#reset").addEventListener("click", ()=>{
+    document.body.classList.remove("dark"); $("#darkToggle").checked=false; state.dark=false;
+    $("#project").value = state.project = "North Hub DC"; $("#projectChip").textContent="Project: "+state.project;
+    setPreset("Warehouse",10000,"Steel","Standard","Standard","North",true,false,true);
+    state.checklist={...defaultChecklist}; renderChecklist();
+    state.sent=false; state.lastSent=null; $("#dash").style.display="none"; $("#waitingCard").style.display="";
+    toast("Reset done.");
+  });
+
+  // dark mode
+  $("#darkToggle").addEventListener("change",(e)=>{ state.dark=e.target.checked; document.body.classList.toggle("dark", state.dark); recolorCharts(); });
+
+  // send & share (both main + sticky)
+  $("#sendBtn").addEventListener("click", sendScenario);
+  $("#sendBtnSticky").addEventListener("click", sendScenario);
+  $("#shareBtn").addEventListener("click", makeShare);
+  $("#shareBtnSticky").addEventListener("click", makeShare);
+
+  function sendScenario(){
+    state.sent=true; state.lastSent = new Date().toISOString().slice(0,19).replace('T',' ');
+    $("#waitingCard").style.display="none"; $("#dash").style.display="";
+    updateDashboard();
+    toast("Sent! ✅");
+    if (window.matchMedia("(max-width:1024px)").matches) activateTab("dash");
+  }
+  function makeShare(){
+    const fake=`https://core-inn.hermosillo/sim/${Math.floor(Date.now()/1000)}`;
+    state.fakeUrl=fake; $("#shareUrl").textContent=fake;
+    const qrBox=$("#qr"); qrBox.innerHTML=""; new QRCode(qrBox,{text:fake,width:160,height:160});
+    $("#shareCard").style.display="";
+    toast("Fake share link created");
+  }
+
+  // ---------- Simulation ----------
+  function captureScenario(){
+    return {
+      project: state.project, project_type: state.project_type, area_m2: state.built_area,
+      structural_system: state.structural_system, envelope: state.envelope, quality: state.quality, region: state.region,
+      opts: {skylights:state.opt_skylights, mezzanine:state.opt_mezzanine, hvac:state.opt_hvac},
+      checklist: {...state.checklist}, sent_at: state.lastSent
     };
+  }
+  function computeSim(scn){
+    const baseTable = {"Warehouse|Steel":420,"Warehouse|Concrete":450,"Office|Steel":520,"Office|Concrete":560,"Retail|Steel":480,"Retail|Concrete":510};
+    const base = baseTable[`${scn.project_type}|${scn.structural_system}`];
+    const regionMult = {North:0.95, Central:1.00, South:1.05}[scn.region];
+    const envMult = {Standard:1.00, Insulated:1.08}[scn.envelope];
+    const qualMult = {Basic:0.95, Standard:1.00, Premium:1.12}[scn.quality];
+    const unitCostBase = base * regionMult * envMult * qualMult;
 
-    const state = {
-      dark: false,
-      sent: false,
-      lastSent: null,
-      fakeUrl: null,
-      project: "North Hub DC",
-      project_type: "Warehouse",
-      built_area: 10000,
-      structural_system: "Steel",
-      envelope: "Standard",
-      quality: "Standard",
-      region: "North",
-      opt_skylights: true,
-      opt_mezzanine: false,
-      opt_hvac: true,
-      checklist: {...defaultChecklist},
+    let adders=0; if(scn.opts.skylights) adders+=8; if(scn.opts.mezzanine) adders+=60; if(scn.opts.hvac) adders+=45;
+    const unchecked = Object.values(scn.checklist).filter(v=>!v).length;
+    const contingencyPct = Math.min(unchecked*0.005, 0.05);
+
+    const area=scn.area_m2;
+    const subtotal= area*(unitCostBase+adders);
+    const total = subtotal*(1+contingencyPct);
+
+    const structure= total*0.35, envelope= total*0.18, mep= total*0.20, finishes= total*0.22;
+    const contingencyVal = total - (structure+envelope+mep+finishes);
+
+    let steel_t, conc_m3, co2, lead_weeks;
+    if(scn.structural_system==="Steel"){ steel_t=+(area*0.02).toFixed(1); conc_m3=+(area*0.05).toFixed(1); co2=+(steel_t*1.8+conc_m3*0.1).toFixed(1); lead_weeks=scn.opts.mezzanine?14:12; }
+    else { steel_t=+(area*0.008).toFixed(1); conc_m3=+(area*0.12).toFixed(1); co2=+(steel_t*1.4+conc_m3*0.22).toFixed(1); lead_weeks=scn.opts.mezzanine?16:14; }
+    if(scn.opts.hvac) lead_weeks+=1; if(scn.region==="South") lead_weeks+=1;
+
+    const unit_cost = area? total/area : 0;
+
+    return {
+      unit_cost:+unit_cost.toFixed(2),
+      total_cost:Math.round(total),
+      contingency_pct:+(contingencyPct*100).toFixed(1),
+      steel_t, concrete_m3:conc_m3, co2_tons:co2, lead_time_wks:lead_weeks,
+      cost_buckets:{Structure:Math.round(structure), Envelope:Math.round(envelope), MEP:Math.round(mep), Finishes:Math.round(finishes), Contingency:Math.round(contingencyVal)},
+      subtotal_no_cont:Math.round(subtotal), adders_per_m2:adders
     };
+  }
 
-    // -------------------------------
-    // Helpers
-    // -------------------------------
-    const $ = sel => document.querySelector(sel);
-    const fmt = (n, opts={}) => Number(n).toLocaleString(undefined, opts);
-    function toast(msg){
-      const t = $("#toast");
-      t.textContent = msg;
-      t.classList.add("show");
-      setTimeout(()=>t.classList.remove("show"), 1400);
-    }
-    function nowStr(){
-      const d = new Date();
-      const pad = n => String(n).padStart(2,'0');
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    }
+  // ---------- Dashboard ----------
+  function updateDashboard(){
+    const scn = captureScenario();
+    const calc = computeSim(scn);
 
-    // -------------------------------
-    // UI Bindings
-    // -------------------------------
-    // project select
-    $("#project").addEventListener("change", e => state.project = e.target.value);
-    // range output
-    const areaInput = $("#area"), areaOut = $("#areaOut");
-    areaInput.addEventListener("input", () => { areaOut.textContent = areaInput.value; });
+    $("#scenarioSummary").innerHTML = `<div><b>Project:</b> ${scn.project}<br><b>Date/Time:</b> ${scn.sent_at}<br><b>Area:</b> ${fmt(scn.area_m2)} m²</div>`;
+    // pills built as chips that never line-break internally
+    const pills = [
+      ["Type", scn.project_type],
+      ["Structure", scn.structural_system],
+      ["Envelope", scn.envelope],
+      ["Quality", scn.quality],
+      ["Region", scn.region]
+    ].map(([k,v]) => `<span class="chip chip--pill">${k}: <b>${v}</b></span>`).join("");
+    $("#scenarioPills").innerHTML = pills;
 
-    // checklist render
-    function renderChecklist(){
-      const box = $("#checklistBox");
-      box.innerHTML = "";
-      Object.entries(state.checklist).forEach(([k,v], i) => {
-        const id = "chk_" + i;
-        const wrap = document.createElement("label");
-        wrap.className = "switch";
-        wrap.innerHTML = `<input type="checkbox" id="${id}" ${v ? "checked":""}> ${k}`;
-        box.appendChild(wrap);
-        wrap.querySelector("input").addEventListener("change", ev => {
-          state.checklist[k] = ev.target.checked;
-        });
-      });
-    }
-    renderChecklist();
+    render3DBox(scn);
 
-    // presets
-    $("#preset1").addEventListener("click", ()=>{
-      setPreset("Warehouse",10000,"Steel","Standard","Basic","North",true,false,true);
-      toast("Preset loaded");
+    $("#kpiBox").innerHTML = [
+      ["Total Cost", `$${fmt(calc.total_cost)}`],
+      ["Unit Cost (USD/m²)", `$${fmt(calc.unit_cost,{minimumFractionDigits:2,maximumFractionDigits:2})}`],
+      ["Contingency", `${calc.contingency_pct}%`],
+      ["CO₂ (tCO₂e)", fmt(calc.co2_tons,{minimumFractionDigits:1,maximumFractionDigits:1})],
+      ["Lead Time", `${calc.lead_time_wks} wks`]
+    ].map(([l,v])=>`<div class="kpi"><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join("");
+
+    // charts
+    const labels=Object.keys(calc.cost_buckets), values=Object.values(calc.cost_buckets);
+    Plotly.newPlot("donut", [{type:"pie",labels,values,hole:.55,textinfo:"label+percent",hoverinfo:"label+value+percent",pull:labels.map(()=>.02)}], baseLayout(), {displayModeBar:false, responsive:true});
+    Plotly.newPlot("bar", [{type:"bar",x:["Steel (t)","Concrete (m³)"],y:[calc.steel_t,calc.concrete_m3]}], baseLayout({yaxis:{title:""}}), {displayModeBar:false, responsive:true});
+    const qLevels=["Basic","Standard","Premium"];
+    const unitCosts=qLevels.map(q=>{const s=JSON.parse(JSON.stringify(scn)); s.quality=q; return computeSim(s).unit_cost;});
+    Plotly.newPlot("line", [{type:"scatter",mode:"lines+markers",x:qLevels,y:unitCosts}], baseLayout({yaxis:{title:"USD/m²"}}), {displayModeBar:false, responsive:true});
+
+    recolorCharts();
+  }
+
+  function baseLayout(extra={}){
+    const paper=getComputedStyle(document.body).getPropertyValue('--paper').trim();
+    return Object.assign({margin:{l:10,r:10,t:10,b:10},paper_bgcolor:paper,plot_bgcolor:paper,showlegend:false}, extra);
+  }
+  function recolorCharts(){
+    const paper=getComputedStyle(document.body).getPropertyValue('--paper').trim();
+    ["donut","bar","line","chart3d"].forEach(id=>{
+      const gd=document.getElementById(id); if(gd && gd.data) Plotly.relayout(gd,{paper_bgcolor:paper,plot_bgcolor:paper});
     });
-    $("#preset2").addEventListener("click", ()=>{
-      setPreset("Office",5000,"Concrete","Insulated","Premium","Central",false,true,true);
-      toast("Preset loaded");
-    });
-    $("#preset3").addEventListener("click", ()=>{
-      setPreset("Retail",3000,"Steel","Standard","Standard","South",true,false,true);
-      toast("Preset loaded");
-    });
-    function setPreset(pType, area, struct, env, qual, region, skyl, mezz, hvac){
-      $("#project_type").value = state.project_type = pType;
-      areaInput.value = state.built_area = area; areaOut.textContent = area;
-      document.querySelector(`input[name="structure"][value="${struct}"]`).checked = true;
-      state.structural_system = struct;
-      $("#envelope").value = state.envelope = env;
-      $("#quality").value = state.quality = qual;
-      $("#region").value = state.region = region;
-      $("#opt_skylights").checked = state.opt_skylights = skyl;
-      $("#opt_mezzanine").checked = state.opt_mezzanine = mezz;
-      $("#opt_hvac").checked = state.opt_hvac = hvac;
-    }
+  }
+  window.addEventListener("resize", ()=>["donut","bar","line","chart3d"].forEach(id=>{ const gd=document.getElementById(id); if(gd && gd.data) Plotly.Plots.resize(gd); }));
 
-    // reset
-    $("#reset").addEventListener("click", ()=>{
-      document.body.classList.remove("dark");
-      state.dark = false;
-      $("#darkToggle").checked = false;
+  function render3DBox(scn){
+    const ratios={Warehouse:2.2, Office:1.2, Retail:1.6}; const ratio=ratios[scn.project_type] ?? 1.5;
+    const area=Math.max(scn.area_m2,1), length=Math.sqrt(area*ratio), width=area/length;
+    let h={Basic:9, Standard:11, Premium:13}[scn.quality]; if(scn.opts.mezzanine) h+=2;
 
-      $("#project").value = state.project = "North Hub DC";
-      $("#project_type").value = state.project_type = "Warehouse";
-      areaInput.value = state.built_area = 10000; areaOut.textContent = "10000";
-      document.querySelector(`input[name="structure"][value="Steel"]`).checked = true;
-      state.structural_system = "Steel";
-      $("#envelope").value = state.envelope = "Standard";
-      $("#quality").value = state.quality = "Standard";
-      $("#region").value = state.region = "North";
-      $("#opt_skylights").checked = state.opt_skylights = true;
-      $("#opt_mezzanine").checked = state.opt_mezzanine = false;
-      $("#opt_hvac").checked = state.opt_hvac = true;
-      state.checklist = {...defaultChecklist};
-      renderChecklist();
+    const x=[0,length,length,0,0,length,length,0], y=[0,0,width,width,0,0,width,width], z=[0,0,0,0,h,h,h,h];
+    const i=[0,0,0,1,2,4,5,6,7,3,1,2], j=[1,4,3,5,3,5,6,7,4,2,5,6], k=[4,5,7,6,7,1,2,4,0,1,4,5];
 
-      state.sent = false;
-      state.lastSent = null;
-      $("#waitingCard").style.display = "";
-      $("#dash").style.display = "none";
-      $("#shareCard").style.display = "none";
-      toast("Reset done.");
-    });
+    const mesh={type:"mesh3d",x,y,z,i,j,k,opacity:.3,color:getComputedStyle(document.documentElement).getPropertyValue('--orange').trim()};
+    const edges={type:"scatter3d",mode:"lines",
+      x:[x[0],x[1],null,x[1],x[2],null,x[2],x[3],null,x[3],x[0],null,x[4],x[5],null,x[5],x[6],null,x[6],x[7],null,x[7],x[4],null,x[0],x[4],null,x[1],x[5],null,x[2],x[6],null,x[3],x[7],null],
+      y:[y[0],y[1],null,y[1],y[2],null,y[2],y[3],null,y[3],y[0],null,y[4],y[5],null,y[5],y[6],null,y[6],y[7],null,y[7],y[4],null,y[0],y[4],null,y[1],y[5],null,y[2],y[6],null,y[3],y[7],null],
+      z:[z[0],z[1],null,z[1],z[2],null,z[2],z[3],null,z[3],z[0],null,z[4],z[5],null,z[5],z[6],null,z[6],z[7],null,z[7],z[4],null,z[0],z[4],null,z[1],z[5],null,z[2],z[6],null,z[3],z[7],null],
+      line:{width:4}
+    };
+    const paper=getComputedStyle(document.body).getPropertyValue('--paper').trim();
+    Plotly.newPlot("chart3d",[mesh,edges],{scene:{xaxis:{visible:false},yaxis:{visible:false},zaxis:{visible:false},aspectmode:"data"},margin:{l:0,r:0,t:0,b:0},paper_bgcolor:paper,showlegend:false},{displayModeBar:false, responsive:true});
+  }
 
-    // dark mode
-    $("#darkToggle").addEventListener("change", (e)=>{
-      state.dark = e.target.checked;
-      document.body.classList.toggle("dark", state.dark);
-      // Re-style charts for dark background
-      recolorCharts();
-    });
-
-    // form fields sync on send
-    function captureFormIntoState(){
-      state.project_type = $("#project_type").value;
-      state.built_area = parseInt($("#area").value, 10);
-      state.structural_system = document.querySelector('input[name="structure"]:checked').value;
-      state.envelope = $("#envelope").value;
-      state.quality = $("#quality").value;
-      state.region = $("#region").value;
-      state.opt_skylights = $("#opt_skylights").checked;
-      state.opt_mezzanine = $("#opt_mezzanine").checked;
-      state.opt_hvac = $("#opt_hvac").checked;
-    }
-
-    // Send
-    $("#sendBtn").addEventListener("click", ()=>{
-      captureFormIntoState();
-      state.sent = true;
-      state.lastSent = nowStr();
-      $("#waitingCard").style.display = "none";
-      $("#dash").style.display = "";
-      updateDashboard();
-      toast("Sent! ✅");
-    });
-
-    // Share (fake)
-    $("#shareBtn").addEventListener("click", ()=>{
-      const fake = `https://core-inn.hermosillo/sim/${Math.floor(Date.now()/1000)}`;
-      state.fakeUrl = fake;
-      $("#shareUrl").textContent = fake;
-      const qrBox = $("#qr");
-      qrBox.innerHTML = "";
-      new QRCode(qrBox, { text: fake, width: 160, height:160 });
-      $("#shareCard").style.display = "";
-      toast("Fake share link created");
-    });
-
-    // -------------------------------
-    // Simulation Logic (JS port)
-    // -------------------------------
-    function computeSim(scn){
-      const baseTable = {
-        "Warehouse|Steel":420, "Warehouse|Concrete":450,
-        "Office|Steel":520, "Office|Concrete":560,
-        "Retail|Steel":480, "Retail|Concrete":510
-      };
-      const base = baseTable[`${scn.project_type}|${scn.structural_system}`];
-      const regionMult = {North:0.95, Central:1.00, South:1.05}[scn.region];
-      const envMult = {Standard:1.00, Insulated:1.08}[scn.envelope];
-      const qualMult = {Basic:0.95, Standard:1.00, Premium:1.12}[scn.quality];
-      const unitCostBase = base * regionMult * envMult * qualMult;
-
-      let adders = 0;
-      if (scn.opts.skylights) adders += 8;
-      if (scn.opts.mezzanine) adders += 60;
-      if (scn.opts.hvac) adders += 45;
-
-      const unchecked = Object.values(scn.checklist).filter(v => !v).length;
-      const contingencyPct = Math.min(unchecked * 0.005, 0.05);
-
-      const area = scn.area_m2;
-      const subtotal = area * (unitCostBase + adders);
-      const total = subtotal * (1 + contingencyPct);
-
-      const structure = total * 0.35;
-      const envelope = total * 0.18;
-      const mep = total * 0.20;
-      const finishes = total * 0.22;
-      const contingencyVal = total - (structure + envelope + mep + finishes);
-
-      let steel_t, conc_m3, co2, lead_weeks;
-      if (scn.structural_system === "Steel"){
-        steel_t = +(area * 0.02).toFixed(1);
-        conc_m3 = +(area * 0.05).toFixed(1);
-        co2 = +(steel_t * 1.8 + conc_m3 * 0.1).toFixed(1);
-        lead_weeks = scn.opts.mezzanine ? 14 : 12;
-      }else{
-        steel_t = +(area * 0.008).toFixed(1);
-        conc_m3 = +(area * 0.12).toFixed(1);
-        co2 = +(steel_t * 1.4 + conc_m3 * 0.22).toFixed(1);
-        lead_weeks = scn.opts.mezzanine ? 16 : 14;
-      }
-      if (scn.opts.hvac) lead_weeks += 1;
-      if (scn.region === "South") lead_weeks += 1;
-
-      const unit_cost = area ? total/area : 0;
-
-      return {
-        unit_cost: +unit_cost.toFixed(2),
-        total_cost: Math.round(total),
-        contingency_pct: +(contingencyPct * 100).toFixed(1),
-        steel_t, concrete_m3: conc_m3, co2_tons: co2,
-        lead_time_wks: lead_weeks,
-        cost_buckets: {
-          "Structure": Math.round(structure),
-          "Envelope": Math.round(envelope),
-          "MEP": Math.round(mep),
-          "Finishes": Math.round(finishes),
-          "Contingency": Math.round(contingencyVal),
-        },
-        subtotal_no_cont: Math.round(subtotal),
-        adders_per_m2: adders,
-      };
-    }
-
-    function captureScenario(){
-      return {
-        project: state.project,
-        project_type: state.project_type,
-        area_m2: state.built_area,
-        structural_system: state.structural_system,
-        envelope: state.envelope,
-        quality: state.quality,
-        region: state.region,
-        opts: {
-          skylights: state.opt_skylights,
-          mezzanine: state.opt_mezzanine,
-          hvac: state.opt_hvac,
-        },
-        checklist: {...state.checklist},
-        sent_at: state.lastSent,
-      };
-    }
-
-    // -------------------------------
-    // Dashboard Render
-    // -------------------------------
-    function updateDashboard(){
-      const scn = captureScenario();
-      const calc = computeSim(scn);
-
-      // Summary text
-      $("#scenarioSummary").innerHTML =
-        `<div><b>Project:</b> ${scn.project}<br><b>Date/Time:</b> ${scn.sent_at}<br><b>Area:</b> ${fmt(scn.area_m2)} m²</div>`;
-      const pills = [
-        ["Type", scn.project_type],
-        ["Structure", scn.structural_system],
-        ["Envelope", scn.envelope],
-        ["Quality", scn.quality],
-        ["Region", scn.region]
-      ].map(([k,v])=>`<span class="pill orange">${k}: ${v}</span>`).join("");
-      $("#scenarioPills").innerHTML = pills || "";
-
-      // 3D box (Plotly Mesh3d + edges)
-      render3DBox(scn);
-
-      // KPIs
-      $("#kpiBox").innerHTML = `
-        ${metric("Total Cost", `$${fmt(calc.total_cost)}`)}
-        ${metric("Unit Cost (USD/m²)", `$${fmt(calc.unit_cost, {minimumFractionDigits:2, maximumFractionDigits:2})}`)}
-        ${metric("Contingency", `${fmt(calc.contingency_pct)}%`)}
-        ${metric("CO₂ (tCO₂e)", fmt(calc.co2_tons, {minimumFractionDigits:1, maximumFractionDigits:1}))}
-        ${metric("Lead Time", `${calc.lead_time_wks} wks`)}
-      `;
-
-      // Donut
-      const labels = Object.keys(calc.cost_buckets);
-      const values = Object.values(calc.cost_buckets);
-      Plotly.newPlot("donut", [{
-        type:"pie", labels, values, hole:.55, textinfo:"label+percent", hoverinfo:"label+value+percent", pull: labels.map(_=>0.02)
-      }], baseLayout());
-
-      // Bar
-      Plotly.newPlot("bar", [{
-        type:"bar", x:["Steel (t)", "Concrete (m³)"], y:[calc.steel_t, calc.concrete_m3]
-      }], baseLayout({yaxis:{title:""}}));
-
-      // Line (quality sweep)
-      const qLevels = ["Basic","Standard","Premium"];
-      const unitCosts = qLevels.map(q=>{
-        const scn2 = JSON.parse(JSON.stringify(scn));
-        scn2.quality = q;
-        return computeSim(scn2).unit_cost;
-      });
-      Plotly.newPlot("line", [{
-        type:"scatter", mode:"lines+markers", x:qLevels, y:unitCosts
-      }], baseLayout({yaxis:{title:"USD/m²"}}));
-
-      recolorCharts();
-    }
-
-    function metric(label, k){
-      return `<div class="metric"><div style="opacity:.7">${label}</div><div class="k">${k}</div></div>`;
-    }
-
-    function baseLayout(extra={}){
-      const paper = getComputedStyle(document.body).getPropertyValue('--paper').trim();
-      return Object.assign({
-        margin:{l:10,r:10,t:10,b:10},
-        paper_bgcolor: paper,
-        plot_bgcolor: paper,
-        showlegend:false
-      }, extra);
-    }
-
-    function recolorCharts(){
-      // reapply layout bg when dark toggle flips
-      const ids = ["donut","bar","line","chart3d"];
-      const paper = getComputedStyle(document.body).getPropertyValue('--paper').trim();
-      ids.forEach(id=>{
-        const gd = document.getElementById(id);
-        if (gd && gd.data) {
-          Plotly.relayout(gd, {paper_bgcolor: paper, plot_bgcolor: paper});
-        }
-      });
-    }
-
-    function render3DBox(scn){
-      const ratios = {Warehouse:2.2, Office:1.2, Retail:1.6};
-      const ratio = ratios[scn.project_type] ?? 1.5;
-      const area = Math.max(scn.area_m2, 1);
-      const length = Math.sqrt(area * ratio);
-      const width  = area / length;
-      let baseH = {Basic:9, Standard:11, Premium:13}[scn.quality];
-      if (scn.opts.mezzanine) baseH += 2;
-
-      const x=[0,length,length,0,0,length,length,0];
-      const y=[0,0,width,width,0,0,width,width];
-      const z=[0,0,0,0,baseH,baseH,baseH,baseH];
-      const i=[0,0,0,1,2,4,5,6,7,3,1,2];
-      const j=[1,4,3,5,3,5,6,7,4,2,5,6];
-      const k=[4,5,7,6,7,1,2,4,0,1,4,5];
-
-      const mesh = {
-        type:"mesh3d", x,y,z,i,j,k, opacity:.3, color:getComputedStyle(document.documentElement).getPropertyValue('--brand-orange').trim()
-      };
-      const edges = {
-        type:"scatter3d", mode:"lines",
-        x:[x[0],x[1],null, x[1],x[2],null, x[2],x[3],null, x[3],x[0],null,
-           x[4],x[5],null, x[5],x[6],null, x[6],x[7],null, x[7],x[4],null,
-           x[0],x[4],null, x[1],x[5],null, x[2],x[6],null, x[3],x[7],null],
-        y:[y[0],y[1],null, y[1],y[2],null, y[2],y[3],null, y[3],y[0],null,
-           y[4],y[5],null, y[5],y[6],null, y[6],y[7],null, y[7],y[4],null,
-           y[0],y[4],null, y[1],y[5],null, y[2],y[6],null, y[3],y[7],null],
-        z:[z[0],z[1],null, z[1],z[2],null, z[2],z[3],null, z[3],z[0],null,
-           z[4],z[5],null, z[5],z[6],null, z[6],z[7],null, z[7],z[4],null,
-           z[0],z[4],null, z[1],z[5],null, z[2],z[6],null, z[3],z[7],null],
-        line:{width:4}
-      };
-      const paper = getComputedStyle(document.body).getPropertyValue('--paper').trim();
-      Plotly.newPlot("chart3d", [mesh, edges], {
-        scene:{xaxis:{visible:false}, yaxis:{visible:false}, zaxis:{visible:false}, aspectmode:"data"},
-        margin:{l:0,r:0,t:0,b:0},
-        paper_bgcolor: paper,
-        showlegend:false
-      });
-    }
-
-    // initialize structural radio linkage
-    document.querySelectorAll('input[name="structure"]').forEach(r=>{
-      r.addEventListener('change', e=> state.structural_system = e.target.value);
-    });
-
-    // seed initial values in selects
-    $("#project").value = state.project;
-    $("#project_type").value = state.project_type;
-    $("#envelope").value = state.envelope;
-    $("#quality").value = state.quality;
-    $("#region").value = state.region;
-    $("#opt_skylights").checked = state.opt_skylights;
-    $("#opt_mezzanine").checked = state.opt_mezzanine;
-    $("#opt_hvac").checked = state.opt_hvac;
-  </script>
+  // ---------- Init ----------
+  $("#project").value=state.project;
+  $("#project_type").value=state.project_type;
+  $("#envelope").value=state.envelope;
+  $("#quality").value=state.quality;
+  $("#region").value=state.region;
+  $("#opt_skylights").checked=state.opt_skylights;
+  $("#opt_mezzanine").checked=state.opt_mezzanine;
+  $("#opt_hvac").checked=state.opt_hvac;
+</script>
 </body>
 </html>
