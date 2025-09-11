@@ -13,7 +13,6 @@
   <meta name="theme-color" content="#FF6A00" id="theme-color">
   <meta name="msapplication-TileColor" content="#FF6A00" id="ms-tilecolor">
 
-
   <!-- Inter font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,6 +64,12 @@
     .preview-hint{position:absolute; bottom:.5rem; right:.5rem; background:rgba(255,255,255,.9); font-size:.75rem; padding:.25rem .5rem; border-radius:.5rem;}
     .preview-blocked{position:absolute; inset:0; display:none; place-items:center; text-align:center; background:rgba(248,250,252,.9); color:#334155; padding:1rem;}
     .preview-wrap.is-blocked .preview-blocked{display:grid;}
+
+    /* NEW: scaled “full page” mode inside the card */
+    .preview-iframe.fit-contain{
+      right:auto; bottom:auto;             /* override inset:0 from base rule */
+      transform-origin: 0 0;               /* scale from top-left corner */
+    }
 
     /* ---- FLIP Expander ---- */
     .expander-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; transition:opacity .25s ease; z-index:100;}
@@ -355,6 +360,7 @@
           <div class="preview-wrap aspect-video bg-slate-100">
             <iframe class="preview-iframe cardPreview"
                     data-src="./AU-2025-demo.html?embed=1"
+                    data-fit="contain"
                     title="ACC Setup Preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                     sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
             <div class="preview-hint hidden sm:block">Click to interact</div>
@@ -375,6 +381,7 @@
           <div class="preview-wrap aspect-video bg-slate-100">
             <iframe class="preview-iframe cardPreview"
                     data-src="./parametric-budget-demo.html?embed=1"
+                    data-fit="contain"
                     title="Parametric Budgeting Preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                     sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
             <div class="preview-hint hidden sm:block">Click to interact</div>
@@ -395,6 +402,7 @@
           <div class="preview-wrap aspect-video bg-slate-100">
             <iframe class="preview-iframe cardPreview"
                     data-src="./industrial-park-demo.html?embed=1"
+                    data-fit="contain"
                     title="Industrial Park Preview" loading="lazy"
                     sandbox="allow-scripts allow-same-origin"
                     referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -572,26 +580,79 @@
     };
     syncContacts(); const _applyThemeOrig = applyTheme; applyTheme = function(key){ _applyThemeOrig(key); syncContacts(); };
 
-    // ---------- Lazy-load live previews inside cards ----------
+    /* ==========================================================
+       LAZY-LOAD + FULL-PAGE PREVIEW SCALER FOR SAME-ORIGIN IFRAMES
+       ========================================================== */
+    function fitIframeContain(ifr){
+      const wrap = ifr.closest('.preview-wrap');
+      if(!wrap) return;
+      try{
+        const doc  = ifr.contentDocument || ifr.contentWindow.document;
+        const root = doc.documentElement;
+        const body = doc.body;
+
+        // In-iframe page dimensions
+        const pageW = Math.max(root.scrollWidth,  body ? body.scrollWidth  : 0, ifr.contentWindow.innerWidth);
+        const pageH = Math.max(root.scrollHeight, body ? body.scrollHeight : 0, ifr.contentWindow.innerHeight);
+
+        // Container dimensions
+        const wrapW = wrap.clientWidth;
+        const wrapH = wrap.clientHeight;
+
+        const scale = Math.min(wrapW / pageW, wrapH / pageH);
+
+        // Prepare and scale
+        ifr.classList.add('fit-contain');
+        ifr.style.left = '0';
+        ifr.style.top  = '0';
+        ifr.style.width  = pageW + 'px';
+        ifr.style.height = pageH + 'px';
+
+        // Center inside the preview box
+        const offX = (wrapW - pageW * scale) / 2;
+        const offY = (wrapH - pageH * scale) / 2;
+        ifr.style.transform = `translate(${offX}px, ${offY}px) scale(${scale})`;
+      }catch(e){
+        // Cross-origin: ignore (e.g., Looker Studio)
+      }
+    }
+
     const previewIframes = document.querySelectorAll('.cardPreview');
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => {
-        if (e.isIntersecting) {
-          const ifr = e.target;
-          if (!ifr.src && ifr.dataset.src) {
-            ifr.src = ifr.dataset.src;
-            const wrap = ifr.closest('.preview-wrap');
-            const timer = setTimeout(() => { wrap && wrap.classList.add('is-blocked'); }, 3000);
-            ifr.addEventListener('load', () => { clearTimeout(timer); }, { once:true });
-          }
-          io.unobserve(ifr);
+        if (!e.isIntersecting) return;
+        const ifr = e.target;
+        if (!ifr.src && ifr.dataset.src) {
+          ifr.src = ifr.dataset.src;
+
+          const wrap = ifr.closest('.preview-wrap');
+          const timer = setTimeout(() => { wrap && wrap.classList.add('is-blocked'); }, 3000);
+
+          ifr.addEventListener('load', () => {
+            clearTimeout(timer);
+
+            // If requested and same-origin, scale to show full page
+            if (ifr.dataset.fit === 'contain') {
+              fitIframeContain(ifr);
+
+              // Refit on preview-box resize + window resize
+              const ro = new ResizeObserver(() => fitIframeContain(ifr));
+              ro.observe(wrap);
+              window.addEventListener('resize', () => fitIframeContain(ifr));
+            }
+          }, { once:true });
         }
+        io.unobserve(ifr);
       });
     }, { rootMargin: '200px' });
     previewIframes.forEach(ifr => io.observe(ifr));
+
+    // Prevent card <a> clicks from hijacking the card click
     document.querySelectorAll('#showcase article a').forEach(a => a.addEventListener('click', e => e.stopPropagation()));
 
-    // ---------- FLIP open from card ----------
+    /* -----------------------------
+       FLIP open from card (unchanged)
+       ----------------------------- */
     function cleanOpenUrl(url) {
       try {
         const u = new URL(url, location.href);
